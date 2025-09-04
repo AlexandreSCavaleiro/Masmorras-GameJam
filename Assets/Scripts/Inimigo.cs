@@ -54,6 +54,9 @@ public class Inimigo : MonoBehaviour
     
     // Nivel do inimigo (1 a 4) que afeta aparencia e comportamento
     public int nivel = 1;
+
+    //Quantidade de dano aplicado conforme nivel
+    private int danoAplicavel;
     
     // Distancia ideal que o inimigo deve manter do jogador
     public float distanciaManter = 2f;
@@ -92,7 +95,7 @@ public class Inimigo : MonoBehaviour
     private float duracaoAtaque = 0.5f;
     
     // Tempo que a area de ataque fica ativa durante o ataque
-    private float tempoAreaAtaqueAtiva = 0.25f;
+    // private float tempoAreaAtaqueAtiva = 0.25f;
     
     // Timer para controle de decisoes de flanquear
     private float timerDecisaoFlanco = 0f;
@@ -120,6 +123,9 @@ public class Inimigo : MonoBehaviour
         
         // Inicializa a vida atual com o valor maximo
         vidaAtual = vidaMaxima;
+
+        // Quantidade de dano conforme o nível
+        danoAplicavel = nivel;
         
         // Encontra o jogador na cena pela tag
         GameObject jogadorObj = GameObject.FindGameObjectWithTag("Player");

@@ -9,10 +9,13 @@ public class Jogador : MonoBehaviour
     
     // Referencia para o componente Animator do jogador
     private Animator animador;
-    
+
+    // Referencia para area de ataque (objeto filho)
+    private GameObject areaDeAtaque;
+
     // Referencia para o BoxCollider2D da area de ataque (objeto filho)
     private BoxCollider2D areaDeAtaqueCollider;
-    
+        
     // Variavel para armazenar a direcao atual do jogador (0: cima, 1: baixo, 2: esquerda, 3: direita)
     private int direcao = 1;
     
@@ -65,7 +68,7 @@ public class Jogador : MonoBehaviour
     private float duracaoAtaque = 0.5f;
     
     // Tempo que a area de ataque fica ativa durante o ataque
-    private float tempoAreaAtaqueAtiva = 0.25f;
+    // private float tempoAreaAtaqueAtiva = 0.25f;
 
     // Metodo chamado quando o script e inicializado
     void Start()
@@ -78,7 +81,9 @@ public class Jogador : MonoBehaviour
         
         // Encontra o objeto filho chamado "AreaDeAtaque" e obtem seu BoxCollider2D
         areaDeAtaqueCollider = transform.Find("AreaDeAtaque").GetComponent<BoxCollider2D>();
-        
+
+        areaDeAtaque = GameObject.Find("AreaDeAtaque");
+
         // Desativa a colisao da area de ataque no inicio
         areaDeAtaqueCollider.enabled = false;
         
@@ -235,10 +240,10 @@ public class Jogador : MonoBehaviour
         {
             switch (direcao)
             {
-                case 0: animador.SetBool("atacandoCima", true); break;
-                case 1: animador.SetBool("atacandoBaixo", true); break;
-                case 2: animador.SetBool("atacandoEsq", true); break;
-                case 3: animador.SetBool("atacandoDir", true); break;
+                case 0: animador.SetBool("atacandoCima", true); areaDeAtaque.transform.position = new Vector2(0.105f, 0.327f); break;
+                case 1: animador.SetBool("atacandoBaixo", true); areaDeAtaque.transform.position = new Vector2(0.008f, 0.206f); break;
+                case 2: animador.SetBool("atacandoEsq", true); areaDeAtaque.transform.position = new Vector2(-0.1f, 0.327f); break;
+                case 3: animador.SetBool("atacandoDir", true); areaDeAtaque.transform.position = new Vector2(0.003f, 0.389f); break;
             }
         }
         else if (estaEsquivando)
@@ -377,7 +382,7 @@ public class Jogador : MonoBehaviour
                 // Se o objeto tem o script Inimigo, causa dano
                 if (scriptInimigo != null)
                 {
-                    scriptInimigo.Vida -= 1;
+                    scriptInimigo.vidaAtual -= 1;
                 }
             }
         }
