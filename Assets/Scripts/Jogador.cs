@@ -4,69 +4,29 @@ using System.Collections;
 // Controla movimento, animacoes, esquiva, ataque e sistema de vida
 public class Jogador : MonoBehaviour
 {
-    // Referencia para o componente Rigidbody2D do jogador
-    private Rigidbody2D corpo;
     
-    // Referencia para o componente Animator do jogador
-    private Animator animador;
+    private Rigidbody2D corpo; // Referencia para o componente Rigidbody2D do jogador
+    private Animator animador; // Referencia para o componente Animator do jogador
+    private GameObject areaDeAtaque; // Referencia para area de ataque (objeto filho)
+    private BoxCollider2D areaDeAtaqueCollider; // Referencia para o BoxCollider2D da area de ataque (objeto filho)
+    private int direcao = 1; // Variavel para armazenar a direcao atual do jogador (0: cima, 1: baixo, 2: esquerda, 3: direita)
+    private bool estaAtacando = false; // Variavel para controlar se o jogador esta atacando
+    private bool estaEsquivando = false;// Variavel para controlar se o jogador esta esquivando
+    private bool podeMover = true; // Variavel para controlar se o jogador pode se mover
+    private float horizontal; // Variavel para armazenar input horizontal
+    private float vertical; // Variavel para armazenar input vertical
+    private float cooldownAtaque = 0f; // Variavel para controlar o cooldown entre ataques
+    private float tempoEsquiva = 0f; // Variavel para controlar o tempo de esquiva
+    public float velocidadeMovimento = 5f; // Velocidade maxima de movimentacao do jogador
+    public float forcaEsquiva = 10f; // Forca do impulso durante a esquiva
+    public int vidaAtual = 10; // Vida atual do jogador
+    public int vidaMaxima = 10; // Vida maxima do jogador
+    public int quantidadeEsquivas = 0; // Contador de vezes que o jogador esquivou
+    public int quantidadeAtaques = 0; // Contador de vezes que o jogador atacou
+    public int quantidadeDanoRecebido = 0; // Contador de vezes que o jogador foi atingido
+    private float duracaoEsquiva = 0.3f; // Tempo de duracao da esquiva em segundos
+    private float duracaoAtaque = 0.5f; // Tempo de duracao do ataque em segundos
 
-    // Referencia para area de ataque (objeto filho)
-    private GameObject areaDeAtaque;
-
-    // Referencia para o BoxCollider2D da area de ataque (objeto filho)
-    private BoxCollider2D areaDeAtaqueCollider;
-        
-    // Variavel para armazenar a direcao atual do jogador (0: cima, 1: baixo, 2: esquerda, 3: direita)
-    private int direcao = 1;
-    
-    // Variavel para controlar se o jogador esta atacando
-    private bool estaAtacando = false;
-    
-    // Variavel para controlar se o jogador esta esquivando
-    private bool estaEsquivando = false;
-    
-    // Variavel para controlar se o jogador pode se mover
-    private bool podeMover = true;
-    
-    // Variavel para armazenar input horizontal
-    private float horizontal;
-    
-    // Variavel para armazenar input vertical
-    private float vertical;
-    
-    // Variavel para controlar o cooldown entre ataques
-    private float cooldownAtaque = 0f;
-    
-    // Variavel para controlar o tempo de esquiva
-    private float tempoEsquiva = 0f;
-    
-    // Velocidade maxima de movimentacao do jogador (publica para ajuste no Inspector)
-    public float velocidadeMaxima = 5f;
-    
-    // Forca do impulso durante a esquiva
-    public float forcaEsquiva = 10f;
-    
-    // Vida atual do jogador (publica para acesso de outros scripts)
-    public int vidaAtual = 10;
-    
-    // Vida maxima do jogador (publica para acesso de outros scripts)
-    public int vidaMaxima = 10;
-    
-    // Contador de vezes que o jogador esquivou (publica para acesso de outros scripts)
-    public int quantidadeEsquivas = 0;
-    
-    // Contador de vezes que o jogador atacou (publica para acesso de outros scripts)
-    public int quantidadeAtaques = 0;
-    
-    // Contador de vezes que o jogador foi atingido (publica para acesso de outros scripts)
-    public int quantidadeDanoRecebido = 0;
-    
-    // Tempo de duracao da esquiva em segundos
-    private float duracaoEsquiva = 0.3f;
-    
-    // Tempo de duracao do ataque em segundos
-    private float duracaoAtaque = 0.5f;
-    
     // Tempo que a area de ataque fica ativa durante o ataque
     // private float tempoAreaAtaqueAtiva = 0.25f;
 
@@ -142,13 +102,13 @@ public class Jogador : MonoBehaviour
         AtualizarDirecao();
         
         // Verifica se a tecla de esquiva (espaço) foi pressionada
-        if (Input.GetKeyDown("Jump") && !estaEsquivando && !estaAtacando)
+        if (Input.GetKeyDown(KeyCode.Space) && !estaEsquivando && !estaAtacando)
         {
             IniciarEsquiva();
         }
         
         // Verifica se a tecla de ataque (J) foi pressionada
-        if (Input.GetKeyDown(KeyCode.J) && !estaAtacando && !estaEsquivando && cooldownAtaque <= 0)
+        if (Input.GetKeyDown(KeyCode.KeypadEnter) && !estaAtacando && !estaEsquivando && cooldownAtaque <= 0)
         {
             IniciarAtaque();
         }
@@ -173,7 +133,7 @@ public class Jogador : MonoBehaviour
         }
         
         // Aplica a velocidade ao Rigidbody2D
-        corpo.linearVelocity = movimento * velocidadeMaxima;
+        corpo.linearVelocity = movimento * velocidadeMovimento;
     }
 
     // Atualiza a direcao do jogador baseada nos inputs
@@ -192,11 +152,13 @@ public class Jogador : MonoBehaviour
             if (vertical > 0)
             {
                 direcao = 0;
+                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0.003f, transform.position.y + 2.095f);
             }
             // Para baixo
             else
             {
                 direcao = 1;
+                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0.003f, transform.position.y + 0.856f);
             }
         }
         else if (horizontal != 0)
@@ -205,11 +167,13 @@ public class Jogador : MonoBehaviour
             if (horizontal < 0)
             {
                 direcao = 2;
+                areaDeAtaque.transform.position = new Vector2(transform.position.x - 0.689f, transform.position.y + 1.631f);
             }
             // Para direita
             else
             {
                 direcao = 3;
+                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0.651f, transform.position.y + 1.631f);
             }
         }
     }
@@ -240,10 +204,10 @@ public class Jogador : MonoBehaviour
         {
             switch (direcao)
             {
-                case 0: animador.SetBool("atacandoCima", true); areaDeAtaque.transform.position = new Vector2(0.105f, 0.327f); break;
-                case 1: animador.SetBool("atacandoBaixo", true); areaDeAtaque.transform.position = new Vector2(0.008f, 0.206f); break;
-                case 2: animador.SetBool("atacandoEsq", true); areaDeAtaque.transform.position = new Vector2(-0.1f, 0.327f); break;
-                case 3: animador.SetBool("atacandoDir", true); areaDeAtaque.transform.position = new Vector2(0.003f, 0.389f); break;
+                case 0: animador.SetBool("atacandoCima", true); break;
+                case 1: animador.SetBool("atacandoBaixo", true); break;
+                case 2: animador.SetBool("atacandoEsq", true); break;
+                case 3: animador.SetBool("atacandoDir", true); break;
             }
         }
         else if (estaEsquivando)
@@ -283,7 +247,13 @@ public class Jogador : MonoBehaviour
     {
         // Marca que o jogador esta esquivando
         estaEsquivando = true;
-        
+
+        // Impede movimento durante a esquiva
+        podeMover = false;
+
+        // Para o movimento residual
+        corpo.linearVelocity = Vector2.zero;
+
         // Configura o tempo de duracao da esquiva
         tempoEsquiva = duracaoEsquiva;
         
@@ -303,9 +273,6 @@ public class Jogador : MonoBehaviour
         
         // Aplica forca de impulso na esquiva
         corpo.AddForce(direcaoEsquiva * forcaEsquiva, ForceMode2D.Impulse);
-        
-        // Impede movimento durante a esquiva
-        podeMover = false;
     }
 
     // Finaliza a acao de esquiva
@@ -324,49 +291,50 @@ public class Jogador : MonoBehaviour
     // Inicia a acao de ataque
     void IniciarAtaque()
     {
-        // Marca que o jogador esta atacando
-        estaAtacando = true;
-        
-        // Configura o cooldown do ataque
-        cooldownAtaque = duracaoAtaque;
-        
-        // Incrementa o contador de ataques
-        quantidadeAtaques++;
-        
-        // Impede movimento durante o ataque
-        podeMover = false;
-        
-        // Para o movimento do jogador
-        corpo.linearVelocity = Vector2.zero;
-        
-        // Inicia a corrotina para ativar a area de ataque
-        StartCoroutine(AtivarAreaDeAtaque());
+        if (!estaAtacando)
+        {
+            // Marca que o jogador esta atacando
+            estaAtacando = true;
+
+            // Configura o cooldown do ataque
+            cooldownAtaque = duracaoAtaque;
+
+            // Incrementa o contador de ataques
+            quantidadeAtaques++;
+
+            // Impede movimento durante o ataque
+            podeMover = false;
+
+            // Para o movimento do jogador
+            corpo.linearVelocity = Vector2.zero;
+
+            // Aguarda um quarto de segundo antes de ativar a area de ataque
+            Invoke("AtivarAreaDeAtaque", 0.25f);
+        }
     }
 
     // Corrotina para ativar a area de ataque temporariamente
-    IEnumerator AtivarAreaDeAtaque()
+     void AtivarAreaDeAtaque()
     {
-        // Aguarda um quarto de segundo antes de ativar a area de ataque
-        yield return new WaitForSeconds(0.25f);
-        
         // Ativa o collider da area de ataque
         areaDeAtaqueCollider.enabled = true;
-        
+
         // Aguarda um quarto de segundo com a area ativa
-        yield return new WaitForSeconds(0.25f);
-        
+        Invoke("FinalizarAtaque", 0.25f);
+    }
+
+    void FinalizarAtaque()
+    {
         // Desativa o collider da area de ataque
         areaDeAtaqueCollider.enabled = false;
-        
+
         // Finaliza o ataque
         estaAtacando = false;
-        
+
         // Permite movimento novamente
         podeMover = true;
     }
 	
-	
-
     // Metodo chamado quando a area de ataque colide com outro objeto
     void OnTriggerEnter2D(Collider2D outro)
     {
@@ -374,7 +342,7 @@ public class Jogador : MonoBehaviour
         if (areaDeAtaqueCollider.enabled)
         {
             // Verifica se o objeto colidido e um inimigo
-            if (outro.gameObject.name.Contains("inimigo"))
+            if (outro.gameObject.name.Contains("Inimigo"))
             {
                 // Tenta obter o script Inimigo do objeto colidido
                 Inimigo scriptInimigo = outro.gameObject.GetComponent<Inimigo>();
