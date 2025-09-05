@@ -533,7 +533,7 @@ public class Inimigo : MonoBehaviour
                 // Se o objeto tem o script Jogador, causa dano
                 if (scriptJogador != null)
                 {
-                    scriptJogador.ReceberDano(1);
+                    scriptJogador.DanoAoJogador(1);
                 }
             }
         }
