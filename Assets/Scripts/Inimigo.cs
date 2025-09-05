@@ -109,27 +109,15 @@ public class Inimigo : MonoBehaviour
     // Metodo chamado quando o script e inicializado
     void Start()
     {
-        // Obtem o componente Rigidbody2D do GameObject
-        corpo = GetComponent<Rigidbody2D>();
-        
-        // Obtem o componente Animator do GameObject
-        animador = GetComponent<Animator>();
-        
-        // Encontra o objeto filho chamado "AreaDeAtaque" e obtem seu BoxCollider2D
-        areaDeAtaqueCollider = transform.Find("AreaDeAtaque").GetComponent<BoxCollider2D>();
-        
-        // Desativa a colisao da area de ataque no inicio
-        areaDeAtaqueCollider.enabled = false;
-        
-        // Inicializa a vida atual com o valor maximo
-        vidaAtual = vidaMaxima;
+        corpo = GetComponent<Rigidbody2D>(); // Obtem o componente Rigidbody2D do GameObject
+        animador = GetComponent<Animator>(); // Obtem o componente Animator do GameObject
+        areaDeAtaqueCollider = transform.Find("AreaDeAtaque").GetComponent<BoxCollider2D>(); // Encontra o objeto filho chamado "AreaDeAtaque" e obtem seu BoxCollider2D
+        areaDeAtaqueCollider.enabled = false; // Desativa a colisao da area de ataque no inicio
+        vidaMaxima = nivel;
+        vidaAtual = vidaMaxima; // Inicializa a vida atual com o valor maximo
+        danoAplicavel = nivel; // Quantidade de dano conforme o nível
+        GameObject jogadorObj = GameObject.FindGameObjectWithTag("Player"); // Encontra o jogador na cena pela tag
 
-        // Quantidade de dano conforme o nível
-        danoAplicavel = nivel;
-        
-        // Encontra o jogador na cena pela tag
-        GameObject jogadorObj = GameObject.FindGameObjectWithTag("Player");
-        
         // Se encontrou o jogador, guarda referencia ao transform
         if (jogadorObj != null)
         {
@@ -378,7 +366,7 @@ public class Inimigo : MonoBehaviour
     void AtualizarAnimacoesPorNivel()
     {
         // Define parametro de nivel no Animator para controlar variacoes visuais
-        animador.SetInteger("nivel", nivel);
+        //animador.SetInteger("nivel", nivel);
     }
 
     // Inicia a acao de esquiva
@@ -586,6 +574,6 @@ public class Inimigo : MonoBehaviour
         velocidadeMaxima = 2f + nivel * 0.5f;
         
         // Atualiza animacoes para refletir novo nivel
-        AtualizarAnimacoesPorNivel();
+        //AtualizarAnimacoesPorNivel();
     }
 }
