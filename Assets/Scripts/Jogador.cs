@@ -11,10 +11,14 @@ public class Jogador : MonoBehaviour
     private GameObject areaDeAtaque; // Referencia para area de ataque (objeto filho)
     private BoxCollider2D areaDeAtaqueCollider; // Referencia para o BoxCollider2D da area de ataque (objeto filho)
     private int direcao = 1; // Variavel para armazenar a direcao atual do jogador (0: cima, 1: baixo, 2: esquerda, 3: direita)
+    private int ultimaDirecao = -1;
+    private bool ultimoEstaAtacando = false;
+    private bool ultimoEstaEsquivando = false;
     private bool estaAtacando = false; // Variavel para controlar se o jogador esta atacando
     private bool estaEsquivando = false;// Variavel para controlar se o jogador esta esquivando
     private bool podeMover = true; // Variavel para controlar se o jogador pode se mover
-    private float horizontal; // Variavel para armazenar input horizontal
+    private float ultimaMagnitudeVelocidade = 0f;
+	private float horizontal; // Variavel para armazenar input horizontal
     private float vertical; // Variavel para armazenar input vertical
     private float cooldownAtaque = 0.35f; // Variavel para controlar o cooldown entre ataques
     private float tempoEsquiva = 0f; // Variavel para controlar o tempo de esquiva
@@ -45,11 +49,7 @@ public class Jogador : MonoBehaviour
         vidaAtual = vidaMaxima; // Inicializa a vida atual com o valor maximo
         vivo = true; // inicia o personagem vivo
         focaAtaque = 1; // Foça de ataque inicial
-		
-		RessetAnim();
-		// Atualiza as animacoes baseadas no estado do jogador
-        AtualizarAnimacoes();
-    }
+	}
 
     // Metodo chamado a cada frame
     void Update()
@@ -64,6 +64,9 @@ public class Jogador : MonoBehaviour
         {
             ProcessarEntradas();
         }
+		
+		// Verifica mudanças de estado para atualizar animações
+        VerificarMudancasEstado();
 
         // Garante que a vida nao fique negativa
         if (vidaAtual < 0)
@@ -199,12 +202,30 @@ public class Jogador : MonoBehaviour
                 areaDeAtaque.transform.position = new Vector2(transform.position.x + 0.4f, transform.position.y + 0);
             }
         }
+    }
 
-        if (direcao != direacaoAnterior)
+	private void VerificarMudancasEstado()
+    {
+        bool estadoMudou = false;
+
+        // Verifica se algum parâmetro relevante mudou
+        if (ultimaDirecao != direcao ||
+            ultimoEstaAtacando != estaAtacando ||
+            ultimoEstaEsquivando != estaEsquivando ||
+            Mathf.Abs(ultimaMagnitudeVelocidade - corpo.linearVelocity.magnitude) > 0.1f)
         {
-            RessetAnim();
-			// Atualiza as animacoes baseadas no estado do jogador
-			AtualizarAnimacoes();
+            estadoMudou = true;
+        }
+
+        if (estadoMudou)
+        {
+            AtualizarAnimacoes();
+            
+            // Atualiza os valores de referência
+            ultimaDirecao = direcao;
+            ultimoEstaAtacando = estaAtacando;
+            ultimoEstaEsquivando = estaEsquivando;
+            ultimaMagnitudeVelocidade = corpo.linearVelocity.magnitude;
         }
     }
 
@@ -238,10 +259,10 @@ public class Jogador : MonoBehaviour
         {
             switch (direcao)
             {
-                case 0: animador.SetBool("atacandoCima", true); break;
-                case 1: animador.SetBool("atacandoBaixo", true); break;
-                case 2: animador.SetBool("atacandoEsq", true); break;
-                case 3: animador.SetBool("atacandoDir", true); break;
+                case 0: SetAnimacaoUnica("atacandoCima"); break;
+                case 1: SetAnimacaoUnica("atacandoBaixo"); break;
+                case 2: SetAnimacaoUnica("atacandoEsq"); break;
+                case 3: SetAnimacaoUnica("atacandoDir"); break;
             }
             return;
         }
@@ -249,10 +270,10 @@ public class Jogador : MonoBehaviour
         {
             switch (direcao)
             {
-                case 0: animador.SetBool("esquivandoCima", true); break;
-                case 1: animador.SetBool("esquivandoBaixo", true); break;
-                case 2: animador.SetBool("esquivandoEsq", true); break;
-                case 3: animador.SetBool("esquivandoDir", true); break;
+                case 0: SetAnimacaoUnica("esquivandoCima"); break;
+                case 1: SetAnimacaoUnica("esquivandoBaixo"); break;
+                case 2: SetAnimacaoUnica("esquivandoEsq"); break;
+                case 3: SetAnimacaoUnica("esquivandoDir"); break;
             }
             return;
         }
@@ -260,10 +281,10 @@ public class Jogador : MonoBehaviour
         {
             switch (direcao)
             {
-                case 0: animador.SetBool("andandoCima", true); break;
-                case 1: animador.SetBool("andandoBaixo", true); break;
-                case 2: animador.SetBool("andandoEsq", true); break;
-                case 3: animador.SetBool("andandoDir", true); break;
+                case 0: SetAnimacaoUnica("andandoCima"); break;
+                case 1: SetAnimacaoUnica("andandoBaixo"); break;
+                case 2: SetAnimacaoUnica("andandoEsq"); break;
+                case 3: SetAnimacaoUnica("andandoDir"); break;
             }
             return;
         }
@@ -271,13 +292,22 @@ public class Jogador : MonoBehaviour
         {
             switch (direcao)
             {
-                case 0: animador.SetBool("paradoCima", true); break;
-                case 1: animador.SetBool("paradoBaixo", true); break;
-                case 2: animador.SetBool("paradoEsq", true); break;
-                case 3: animador.SetBool("paradoDir", true); break;
+                case 0: SetAnimacaoUnica("paradoCima"); break;
+                case 1: SetAnimacaoUnica("paradoBaixo"); break;
+                case 2: SetAnimacaoUnica("paradoEsq"); break;
+                case 3: SetAnimacaoUnica("paradoDir"); break;
             }
         }
     }
+
+	private void SetAnimacaoUnica(string animacaoAtual)
+	{
+		// Desativa todas as animações primeiro
+		RessetAnim();
+       
+		// Ativa apenas a animação desejada
+		animador.SetBool(animacaoAtual, true);
+	}
 
     // Inicia a acao de esquiva
     void IniciarEsquiva()
@@ -293,9 +323,6 @@ public class Jogador : MonoBehaviour
 
         // Para o movimento residual
         corpo.linearVelocity = Vector2.zero;
-
-        RessetAnim();
-        AtualizarAnimacoes();
 
         // Configura o tempo de duracao da esquiva
         tempoEsquiva = duracaoEsquiva;
@@ -341,13 +368,9 @@ public class Jogador : MonoBehaviour
         {
             return;
         }
-		RessetAnim();
 		
         // Marca que o jogador esta atacando
         estaAtacando = true;
-
-		// Atualiza as animacoes baseadas no estado do jogador
-		AtualizarAnimacoes();
 			
         // Configura o cooldown do ataque
         cooldownAtaque = duracaoAtaque;
@@ -385,9 +408,6 @@ public class Jogador : MonoBehaviour
 
         // Permite movimento novamente
         podeMover = true;
-
-        RessetAnim();
-        AtualizarAnimacoes();
     }
 	
     
