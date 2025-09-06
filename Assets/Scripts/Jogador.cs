@@ -27,10 +27,10 @@ public class Jogador : MonoBehaviour
     public Transform projetil;
     public float velocidadeMovimento = 5f; // Velocidade maxima de movimentacao do jogador
     public float forcaEsquiva = 10f; // Forca do impulso durante a esquiva
-    public bool vivo;  // Variavel publica para saber se está vivo ou morto
+    public bool vivo;  // Variavel publica para saber se esta vivo ou morto
     public int vidaAtual = 10; // Vida atual do jogador
     public int vidaMaxima = 10; // Vida maxima do jogador
-    public int focaAtaque; // Foça de ataque do jogador
+    public int focaAtaque; // Foca de ataque do jogador
     public int quantidadeEsquivas = 0; // Contador de vezes que o jogador esquivou
     public int quantidadeAtaques = 0; // Contador de vezes que o jogador atacou
     public int quantidadeDanoRecebido = 0; // Contador de vezes que o jogador foi atingido
@@ -49,7 +49,7 @@ public class Jogador : MonoBehaviour
 
         vidaAtual = vidaMaxima; // Inicializa a vida atual com o valor maximo
         vivo = true; // inicia o personagem vivo
-        focaAtaque = 1; // Foça de ataque inicial
+        focaAtaque = 1; // Foca de ataque inicial
 	}
 
     // Metodo chamado a cada frame
@@ -59,12 +59,6 @@ public class Jogador : MonoBehaviour
         if (vidaAtual < 0)
         {
             vidaAtual = 0;
-        }
-
-        if (vidaAtual == 0)
-        {
-
-            vivo = false;
         }
 
         if (!vivo)
@@ -78,8 +72,13 @@ public class Jogador : MonoBehaviour
             ProcessarEntradas();
         }
 		
-		// Verifica mudanças de estado para atualizar animações
-        VerificarMudancasEstado();
+        if (vidaAtual == 0)
+        {
+
+            vivo = false;
+        }
+
+        VerificarMudancasEstado(); // Verifica mudancas de estado para atualizar animacoes
 
         
     }
@@ -164,16 +163,12 @@ public class Jogador : MonoBehaviour
     // Processa as entradas do teclado/controle
     void ProcessarEntradas()
     {
-        // Obtem input horizontal (A/D ou setas horizontais)
-        horizontal = Input.GetAxisRaw("Horizontal");
+        horizontal = Input.GetAxisRaw("Horizontal"); // Obtem input horizontal (A/D ou setas horizontais)
+        vertical = Input.GetAxisRaw("Vertical"); // Obtem input vertical (W/S ou setas verticais)
         
-        // Obtem input vertical (W/S ou setas verticais)
-        vertical = Input.GetAxisRaw("Vertical");
+        AtualizarDirecao(); // Atualiza a direcao do jogador baseada nos inputs
         
-        // Atualiza a direcao do jogador baseada nos inputs
-        AtualizarDirecao();
-        
-        // Verifica se a tecla de esquiva (espaço) foi pressionada
+        // Verifica se a tecla de esquiva (espaco) foi pressionada
         if (Input.GetKeyDown(KeyCode.Space) && !estaEsquivando && !estaAtacando)
         {
             IniciarEsquiva();
@@ -196,8 +191,7 @@ public class Jogador : MonoBehaviour
             return;
         }
 
-        // Cria um vetor de movimento baseado nos inputs
-        Vector2 movimento = new Vector2(horizontal, vertical);
+        Vector2 movimento = new Vector2(horizontal, vertical); // Cria um vetor de movimento baseado nos inputs
         
         // Normaliza o vetor para movimento diagonal nao ser mais rapido
         if (movimento.magnitude > 1)
@@ -205,8 +199,7 @@ public class Jogador : MonoBehaviour
             movimento.Normalize();
         }
 		
-        // Aplica a velocidade ao Rigidbody2D
-        corpo.linearVelocity = movimento * velocidadeMovimento;
+        corpo.linearVelocity = movimento * velocidadeMovimento; // Aplica a velocidade ao Rigidbody2D
 
         if (!vivo)
         {
@@ -218,8 +211,6 @@ public class Jogador : MonoBehaviour
     // Atualiza a direcao do jogador baseada nos inputs
     void AtualizarDirecao()
     {
-        int direacaoAnterior = direcao;
-
         // Se nao ha input, mantem a direcao atual
         if (horizontal == 0 && vertical == 0)
         {
@@ -233,13 +224,13 @@ public class Jogador : MonoBehaviour
             if (vertical > 0)
             {
                 direcao = 0;
-                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0, transform.position.y + 0.5f);
+                areaDeAtaque.transform.position = new Vector2(transform.position.x, transform.position.y + 0.7f);
             }
             // Para baixo
             else
             {
                 direcao = 1;
-                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0, transform.position.y - 0.5f);
+                areaDeAtaque.transform.position = new Vector2(transform.position.x, transform.position.y - 0.7f);
             }
         }
         else if (horizontal != 0)
@@ -248,13 +239,13 @@ public class Jogador : MonoBehaviour
             if (horizontal < 0)
             {
                 direcao = 2;
-                areaDeAtaque.transform.position = new Vector2(transform.position.x - 0.4f, transform.position.y + 0);
+                areaDeAtaque.transform.position = new Vector2(transform.position.x - 0.6f, transform.position.y);
             }
             // Para direita
             else
             {
                 direcao = 3;
-                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0.4f, transform.position.y + 0);
+                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0.6f, transform.position.y);
             }
         }
     }
@@ -263,7 +254,7 @@ public class Jogador : MonoBehaviour
     {
         bool estadoMudou = false;
 
-        // Verifica se algum parâmetro relevante mudou
+        // Verifica se algum parametro relevante mudou
         if (ultimaDirecao != direcao ||
             ultimoEstaAtacando != estaAtacando ||
             ultimoEstaEsquivando != estaEsquivando ||
@@ -281,34 +272,12 @@ public class Jogador : MonoBehaviour
 
             Debugando();
 
-            // Atualiza os valores de referência
+            // Atualiza os valores de referencia
             ultimaDirecao = direcao;
             ultimoEstaAtacando = estaAtacando;
             ultimoEstaEsquivando = estaEsquivando;
             ultimaMagnitudeVelocidade = corpo.linearVelocity.magnitude;
         }
-    }
-
-    // Reseta todos os parametros booleanos do Animator
-    void RessetAnim()
-    {
-        
-        animador.SetBool("paradoCima", false);
-        animador.SetBool("paradoBaixo", false);
-        animador.SetBool("paradoEsq", false);
-        animador.SetBool("paradoDir", false);
-        animador.SetBool("andandoCima", false);
-        animador.SetBool("andandoBaixo", false);
-        animador.SetBool("andandoEsq", false);
-        animador.SetBool("andandoDir", false);
-        animador.SetBool("esquivandoCima", false);
-        animador.SetBool("esquivandoBaixo", false);
-        animador.SetBool("esquivandoEsq", false);
-        animador.SetBool("esquivandoDir", false);
-        animador.SetBool("atacandoCima", false);
-        animador.SetBool("atacandoBaixo", false);
-        animador.SetBool("atacandoEsq", false);
-        animador.SetBool("atacandoDir", false);
     }
 
     // Atualiza os parametros do Animator baseados no estado do jogador
@@ -317,11 +286,6 @@ public class Jogador : MonoBehaviour
         // Determina qual animacao deve ser reproduzida baseada no estado e direcao
         if (estaAtacando)
         {
-            animador.SetBool("parado", false);
-            animador.SetBool("andando", false);
-            animador.SetBool("esquivando", false);
-            animador.SetBool("atacando", true);
-
             animador.SetBool("paradoCima", false);
             animador.SetBool("paradoBaixo", false);
             animador.SetBool("paradoEsq", false);
@@ -337,20 +301,15 @@ public class Jogador : MonoBehaviour
 
             switch (direcao)
             {
-                case 0: SetAnimacaoUnica("atacandoCima"); break;
-                case 1: SetAnimacaoUnica("atacandoBaixo"); break;
-                case 2: SetAnimacaoUnica("atacandoEsq"); break;
-                case 3: SetAnimacaoUnica("atacandoDir"); break;
+                case 0: SetAnimacaoUnica("atacandoCima"); animador.SetBool("atacandoBaixo", false);  animador.SetBool("atacandoEsq", false);  animador.SetBool("atacandoDir", false); break;
+                case 1: SetAnimacaoUnica("atacandoBaixo"); animador.SetBool("atacandoCima", false);  animador.SetBool("atacandoEsq", false);  animador.SetBool("atacandoDir", false); break;
+                case 2: SetAnimacaoUnica("atacandoEsq"); animador.SetBool("atacandoCima", false);  animador.SetBool("atacandoBaixo", false);  animador.SetBool("atacandoDir", false); break;
+                case 3: SetAnimacaoUnica("atacandoDir"); animador.SetBool("atacandoCima", false);  animador.SetBool("atacandoBaixo", false);  animador.SetBool("atacandoEsq", false); break;
             }
             return;
         }
         else if (estaEsquivando)
         {
-            animador.SetBool("parado", false);
-            animador.SetBool("andando", false);
-            animador.SetBool("esquivando", true);
-            animador.SetBool("atacando", false);
-
             animador.SetBool("paradoCima", false);
             animador.SetBool("paradoBaixo", false);
             animador.SetBool("paradoEsq", false);
@@ -366,20 +325,15 @@ public class Jogador : MonoBehaviour
 
             switch (direcao)
             {
-                case 0: SetAnimacaoUnica("esquivandoCima"); break;
-                case 1: SetAnimacaoUnica("esquivandoBaixo"); break;
-                case 2: SetAnimacaoUnica("esquivandoEsq"); break;
-                case 3: SetAnimacaoUnica("esquivandoDir"); break;
+                case 0: SetAnimacaoUnica("esquivandoCima"); animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoEsq", false);  animador.SetBool("esquivandoDir", false); break;
+                case 1: SetAnimacaoUnica("esquivandoBaixo"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoEsq", false);  animador.SetBool("esquivandoDir"false); break;
+                case 2: SetAnimacaoUnica("esquivandoEsq"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoDir", false); break;
+                case 3: SetAnimacaoUnica("esquivandoDir"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoEsq", false); break;
             }
             return;
         }
         else if (corpo.linearVelocity.magnitude > 0.1f)
         {
-            animador.SetBool("parado", false);
-            animador.SetBool("andando", true);
-            animador.SetBool("esquivando", false);
-            animador.SetBool("atacando", false);
-
             animador.SetBool("paradoCima", false);
             animador.SetBool("paradoBaixo", false);
             animador.SetBool("paradoEsq", false);
@@ -395,20 +349,15 @@ public class Jogador : MonoBehaviour
 
             switch (direcao)
             {
-                case 0: SetAnimacaoUnica("andandoCima"); break;
-                case 1: SetAnimacaoUnica("andandoBaixo"); break;
-                case 2: SetAnimacaoUnica("andandoEsq"); break;
-                case 3: SetAnimacaoUnica("andandoDir"); break;
+                case 0: SetAnimacaoUnica("andandoCima"); animador.SetBool("andandoBaixo", false);  animador.SetBool("andandoEsq", false);  animador.SetBool("andandoDir", false); break;
+                case 1: SetAnimacaoUnica("andandoBaixo"); animador.SetBool("andandoCima", false);  animador.SetBool("andandoEsq", false);  animador.SetBool("andandoDir", false); break;
+                case 2: SetAnimacaoUnica("andandoEsq"); animador.SetBool("andandoCima", false);  animador.SetBool("andandoBaixo", false);  animador.SetBool("andandoDir", false); break;
+                case 3: SetAnimacaoUnica("andandoDir"); animador.SetBool("andandoCima", false);  animador.SetBool("andandoBaixo", false);  animador.SetBool("andandoEsq", false); break;
             }
             return;
         }
         else
         {
-            animador.SetBool("parado", true);
-            animador.SetBool("andando", false);
-            animador.SetBool("esquivando", true);
-            animador.SetBool("atacando", false);
-
             animador.SetBool("paradoCima", false);
             animador.SetBool("paradoBaixo", false);
             animador.SetBool("paradoEsq", false);
@@ -424,43 +373,29 @@ public class Jogador : MonoBehaviour
 
             switch (direcao)
             {
-                case 0: SetAnimacaoUnica("paradoCima"); break;
-                case 1: SetAnimacaoUnica("paradoBaixo"); break;
-                case 2: SetAnimacaoUnica("paradoEsq"); break;
-                case 3: SetAnimacaoUnica("paradoDir"); break;
+                case 0: SetAnimacaoUnica("paradoCima"); animador.SetBool("paradoBaixo", false);  animador.SetBool("paradoEsq", false);  animador.SetBool("paradoDir", false); break;
+                case 1: SetAnimacaoUnica("paradoBaixo"); animador.SetBool("paradoCima", false);  animador.SetBool("paradoEsq", false);  animador.SetBool("paradoDir", false); break;
+                case 2: SetAnimacaoUnica("paradoEsq"); animador.SetBool("paradoCima", false);  animador.SetBool("paradoBaixo", false);  animador.SetBool("paradoDir", false); break;
+                case 3: SetAnimacaoUnica("paradoDir"); animador.SetBool("paradoCima", false);  animador.SetBool("paradoBaixo", false);  animador.SetBool("paradoEsq", false); break;
             }
         }
     }
 
 	private void SetAnimacaoUnica(string animacaoAtual)
 	{
-		// Desativa todas as animações primeiro
-		// RessetAnim();
-       
-		// Ativa apenas a animação desejada
+		// Ativa apenas a animacao desejada
 		animador.SetBool(animacaoAtual, true);
     }
 
     // Inicia a acao de esquiva
     void IniciarEsquiva()
     {
-        // Marca que o jogador esta esquivando
-        estaEsquivando = true;
-			
-        // Impede movimento durante a esquiva
-        podeMover = false;
-
-        // Para o movimento residual
-        corpo.linearVelocity = Vector2.zero;
-
-        // Configura o tempo de duracao da esquiva
-        tempoEsquiva = duracaoEsquiva;
-        
-        // Incrementa o contador de esquivas
-        quantidadeEsquivas++;
-        
-        // Aplica um impulso na direcao atual
-        Vector2 direcaoEsquiva = Vector2.zero;
+        estaEsquivando = true; // Marca que o jogador esta esquivando
+        podeMover = false; // Impede movimento durante a esquiva
+        corpo.linearVelocity = Vector2.zero; // Para o movimento residual
+        tempoEsquiva = duracaoEsquiva; // Configura o tempo de duracao da esquiva
+        quantidadeEsquivas++; // Incrementa o contador de esquivas
+        Vector2 direcaoEsquiva = Vector2.zero; // Aplica um impulso na direcao atual
         
         switch (direcao)
         {
@@ -469,22 +404,18 @@ public class Jogador : MonoBehaviour
             case 2: direcaoEsquiva = Vector2.left; break;
             case 3: direcaoEsquiva = Vector2.right; break;
         }
-        
-        // Aplica forca de impulso na esquiva
-        corpo.AddForce(direcaoEsquiva * forcaEsquiva, ForceMode2D.Impulse);
+
+        corpo.AddForce(direcaoEsquiva * forcaEsquiva, ForceMode2D.Impulse); // Aplica forca de impulso na esquiva
+        corpo.enabled = false; // transform.GetComponent<Rigidbody2D>().enabled = false // Desativar Rigidbody
     }
 
     // Finaliza a acao de esquiva
     void FinalizarEsquiva()
     {
-        // Marca que o jogador nao esta mais esquivando
-        estaEsquivando = false;
-        
-        // Permite movimento novamente
-        podeMover = true;
-        
-        // Para o movimento residual da esquiva
-        corpo.linearVelocity = Vector2.zero;
+        estaEsquivando = false; // Marca que o jogador nao esta mais esquivando
+        podeMover = true; // Permite movimento novamente
+        corpo.enabled = true; // transform.GetComponent<Rigidbody2D>().enabled = true // reativar rigidbody
+        corpo.linearVelocity = Vector2.zero; // Para o movimento residual da esquiva
     }
 
     // Inicia a acao de ataque
@@ -495,56 +426,27 @@ public class Jogador : MonoBehaviour
             return;
         }
 		
-        // Marca que o jogador esta atacando
-        estaAtacando = true;
-			
-        // Configura o cooldown do ataque
-        cooldownAtaque = duracaoAtaque;
+        estaAtacando = true; // Marca que o jogador esta atacando
+        cooldownAtaque = duracaoAtaque; // Configura o cooldown do ataque
+        quantidadeAtaques++; // Incrementa o contador de ataques
+        podeMover = false; // Impede movimento durante o ataque
+        corpo.linearVelocity = Vector2.zero; // Para o movimento do jogador
 
-        // Incrementa o contador de ataques
-        quantidadeAtaques++;
-
-        // Impede movimento durante o ataque
-        podeMover = false;
-
-        // Para o movimento do jogador
-        corpo.linearVelocity = Vector2.zero;
-
-        // Aguarda um quarto de segundo antes de ativar a area de ataque
-        Invoke("AtivarAreaDeAtaque", 0.15f);
+        Invoke("AtivarAreaDeAtaque", 0.15f); // Aguarda um tempo antes de ativar a area de ataque
     }
 
     // Corrotina para ativar a area de ataque temporariamente
      void AtivarAreaDeAtaque()
     {
-
-        //Logica do tiro
-        /*
-        Transform instanciado = Instantiate(projetil);
-        instanciado.position = transform.position;
-        instanciado.transform.position = areaDeAtaque.transform.position;
-        instanciado.GetComponent<Projetil>().direcao = new Vector2(0, 0); // new Vector2(jdireita ? 1 : -1, 0);
-        instanciado.GetComponent<Projetil>().enabled = true;
-        instanciado.GetComponent <Projetil>().TiroOriginal = false;
-        */
-
-        // Ativa o collider da area de ataque
-        areaDeAtaqueCollider.enabled = true;
-
-        // Aguarda um quarto de segundo antes de ativar a area de ataque
-        Invoke("FinalizarAtaque", cooldownAtaque);
+        areaDeAtaqueCollider.enabled = true; // Ativa o collider da area de ataque
+        Invoke("FinalizarAtaque", cooldownAtaque); // Aguarda um quarto de segundo antes de ativar a area de ataque
     }
 
     void FinalizarAtaque()
     {
-        // Desativa o collider da area de ataque
-        areaDeAtaqueCollider.enabled = false;
-
-        // Finaliza o ataque
-        estaAtacando = false;
-
-        // Permite movimento novamente
-        podeMover = true;
+        areaDeAtaqueCollider.enabled = false; // Desativa o collider da area de ataque
+        estaAtacando = false; // Finaliza o ataque
+        podeMover = true; // Permite movimento novamente
     }
 	
     
@@ -594,10 +496,12 @@ public class Jogador : MonoBehaviour
     }
 
     void Debugando()
-    {
-        Debug.Log($"Está vivo: {vivo}");
+    {  
+        string estaVivo = vivo == true ? "Esta vivo" : "Morreu!";
+        Debug.Log($"{estaVivo}");
         Debug.Log($"Estado: {GetNomeAnimacaoAtual()}");
         Debug.Log($"Velocidade: {corpo.linearVelocity.magnitude}");
-        Debug.Log($"Atacando: {estaAtacando} Esquivando: {estaEsquivando}");
+        Debug.Log($"Atacando: {estaAtacando}")
+        Debug.Log($"Esquivando: {estaEsquivando}");
     }
 }
