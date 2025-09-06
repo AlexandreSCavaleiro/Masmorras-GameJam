@@ -63,6 +63,7 @@ public class Jogador : MonoBehaviour
 
         if (!vivo)
         {
+			Destroy.this;
             return;
         }
 

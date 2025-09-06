@@ -4,108 +4,52 @@ using System.Collections;
 // Controla movimento, animacoes, esquiva, ataque e sistema de vida do inimigo
 public class Inimigo : MonoBehaviour
 {
-    // Referencia para o componente Rigidbody2D do inimigo
-    private Rigidbody2D corpo;
+    private Rigidbody2D corpo; // Referencia para o componente Rigidbody2D do inimigo
+    private Animator animador; // Referencia para o componente Animator do inimigo
+    private BoxCollider2D areaDeAtaqueCollider; // Referencia para o BoxCollider2D da area de ataque (objeto filho)
+    private Transform alvoJogador; // Referencia para o transform do jogador para perseguicao
+	
+    private int direcao = 1; // Variavel para armazenar a direcao atual do inimigo (0: cima, 1: baixo, 2: esquerda, 3: direita)
+	private int direcaoFlanco = 1; // Direcao atual de flanqueamento (-1 ou 1)
+	private int danoAplicavel; //Quantidade de dano aplicado conforme nivel
+	
+	private float horizontal; // Variavel para armazenar movimento horizontal calculado
+    private float vertical; // Variavel para armazenar movimento vertical calculado
+    private float cooldownAtaque = 0f; // Variavel para controlar o cooldown entre ataques
+    private float tempoEsquiva = 0f; // Variavel para controlar o tempo de esquiva
+    private float duracaoEsquiva = 0.3f; // Tempo de duracao da esquiva em segundos
+    private float duracaoAtaque = 0.5f; // Tempo de duracao do ataque em segundos
+    private float timerDecisaoFlanco = 0f; // Timer para controle de decisoes de flanquear
+    private float intervaloDecisaoFlanco = 2f; // Intervalo para mudar direcao de fla
+	
+    private bool estaAtacando = false; // Variavel para controlar se o inimigo esta atacando
+    private bool estaEsquivando = false; // Variavel para controlar se o inimigo esta esquivando
+    private bool podeMover = true; // Variavel para controlar se o inimigo pode se mover
+    private bool podeAtacar = true; // Variavel para controlar intervalo entre ataques
+		
+    public int vidaAtual = 5; // Vida atual do inimigo (publica para acesso de outros scripts)
+    public int vidaMaxima = 5; // Vida maxima do inimigo (publica para acesso de outros scripts)
+    public int nivel = 1; // Nivel do inimigo (1 a 4) que afeta aparencia e comportamento
+	public int quantidadeEsquivas = 0; // Contador de vezes que o inimigo esquivou
+    public int quantidadeAtaques = 0; // Contador de vezes que o inimigo atacou
+    public int quantidadeDanoRecebido = 0; // Contador de vezes que o inimigo foi atingido
+	
+    public float velocidadeMaxima = 3f; // Velocidade maxima de movimentacao do inimigo (publica para ajuste no Inspector)
+    public float forcaEsquiva = 8f; // Forca do impulso durante a esquiva
+    public float distanciaManter = 2f; // Distancia ideal que o inimigo deve manter do jogador
+    public float distanciaAtaque = 1.5f; // Distancia minima para iniciar ataque
+    public float frequenciaEsquiva = 0.3f; // Frequencia de esquiva (0-1, onde 1 = sempre esquiva)
+	
+    public bool ataqueCriaProjetil = false; // Define se o inimigo deve criar projetil ao atacar
+    public bool deveFlanquear = false; // Define se o inimigo deve flanquear o jogador
+    public bool podeEsquivar = false; // Define se o inimigo pode esquivar
     
-    // Referencia para o componente Animator do inimigo
-    private Animator animador;
-    
-    // Referencia para o BoxCollider2D da area de ataque (objeto filho)
-    private BoxCollider2D areaDeAtaqueCollider;
-    
-    // Referencia para o transform do jogador para perseguicao
-    private Transform alvoJogador;
-    
-    // Variavel para armazenar a direcao atual do inimigo (0: cima, 1: baixo, 2: esquerda, 3: direita)
-    private int direcao = 1;
-    
-    // Variavel para controlar se o inimigo esta atacando
-    private bool estaAtacando = false;
-    
-    // Variavel para controlar se o inimigo esta esquivando
-    private bool estaEsquivando = false;
-    
-    // Variavel para controlar se o inimigo pode se mover
-    private bool podeMover = true;
-    
-    // Variavel para armazenar movimento horizontal calculado
-    private float horizontal;
-    
-    // Variavel para armazenar movimento vertical calculado
-    private float vertical;
-    
-    // Variavel para controlar o cooldown entre ataques
-    private float cooldownAtaque = 0f;
-    
-    // Variavel para controlar o tempo de esquiva
-    private float tempoEsquiva = 0f;
-    
-    // Velocidade maxima de movimentacao do inimigo (publica para ajuste no Inspector)
-    public float velocidadeMaxima = 3f;
-    
-    // Forca do impulso durante a esquiva
-    public float forcaEsquiva = 8f;
-    
-    // Vida atual do inimigo (publica para acesso de outros scripts)
-    public int vidaAtual = 5;
-    
-    // Vida maxima do inimigo (publica para acesso de outros scripts)
-    public int vidaMaxima = 5;
-    
-    // Nivel do inimigo (1 a 4) que afeta aparencia e comportamento
-    public int nivel = 1;
+	public GameObject projetilPrefab; // Prefab do projetil caso ataque crie projetilnco
 
-    //Quantidade de dano aplicado conforme nivel
-    private int danoAplicavel;
-    
-    // Distancia ideal que o inimigo deve manter do jogador
-    public float distanciaManter = 2f;
-    
-    // Distancia minima para iniciar ataque
-    public float distanciaAtaque = 1.5f;
-    
-    // Define se o inimigo deve criar projetil ao atacar
-    public bool ataqueCriaProjetil = false;
-    
-    // Prefab do projetil caso ataque crie projetil
-    public GameObject projetilPrefab;
-    
-    // Define se o inimigo deve flanquear o jogador
-    public bool deveFlanquear = false;
-    
-    // Define se o inimigo pode esquivar
-    public bool podeEsquivar = false;
-    
-    // Frequencia de esquiva (0-1, onde 1 = sempre esquiva)
-    public float frequenciaEsquiva = 0.3f;
-    
-    // Contador de vezes que o inimigo esquivou
-    public int quantidadeEsquivas = 0;
-    
-    // Contador de vezes que o inimigo atacou
-    public int quantidadeAtaques = 0;
-    
-    // Contador de vezes que o inimigo foi atingido
-    public int quantidadeDanoRecebido = 0;
-    
-    // Tempo de duracao da esquiva em segundos
-    private float duracaoEsquiva = 0.3f;
-    
-    // Tempo de duracao do ataque em segundos
-    private float duracaoAtaque = 0.5f;
-    
+	
     // Tempo que a area de ataque fica ativa durante o ataque
     // private float tempoAreaAtaqueAtiva = 0.25f;
     
-    // Timer para controle de decisoes de flanquear
-    private float timerDecisaoFlanco = 0f;
-    
-    // Intervalo para mudar direcao de flanco
-    private float intervaloDecisaoFlanco = 2f;
-    
-    // Direcao atual de flanqueamento (-1 ou 1)
-    private int direcaoFlanco = 1;
-
     // Metodo chamado quando o script e inicializado
     void Start()
     {
@@ -131,6 +75,23 @@ public class Inimigo : MonoBehaviour
     // Metodo chamado a cada frame
     void Update()
     {
+		// Garante que a vida nao fique negativa
+        if (vidaAtual < 0)
+        {
+            vidaAtual = 0;
+        }
+
+		if (vidaAtual == 0)
+        {
+
+            vivo = false;
+        }
+
+		if (!vivo)
+		{
+			Destroy.this;
+		}
+		
         // Se o inimigo pode se mover e tem alvo, processa as decisoes
         if (podeMover && alvoJogador != null)
         {
@@ -182,14 +143,10 @@ public class Inimigo : MonoBehaviour
     // Processa as decisoes de movimento e ataque do inimigo
     void ProcessarDecisoes()
     {
-        // Calcula a distancia atual ate o jogador
-        float distancia = Vector2.Distance(transform.position, alvoJogador.position);
         
-        // Calcula a direcao para o jogador
-        Vector2 direcaoParaJogador = (alvoJogador.position - transform.position).normalized;
-        
-        // Atualiza a direcao do inimigo baseada na posicao do jogador
-        AtualizarDirecao(direcaoParaJogador);
+        float distancia = Vector2.Distance(transform.position, alvoJogador.position); // Calcula a distancia atual ate o jogador
+        Vector2 direcaoParaJogador = (alvoJogador.position - transform.position).normalized; // Calcula a direcao para o jogador
+        AtualizarDirecao(direcaoParaJogador); // Atualiza a direcao do inimigo baseada na posicao do jogador
         
         // Se esta muito perto, decide se esquiva
         if (podeEsquivar && distancia < distanciaAtaque && !estaEsquivando && !estaAtacando && 
@@ -198,16 +155,19 @@ public class Inimigo : MonoBehaviour
             IniciarEsquiva();
             return;
         }
-        
-        // Se esta na distancia de ataque e pode atacar, inicia ataque
-        if (distancia <= distanciaAtaque && !estaAtacando && !estaEsquivando && cooldownAtaque <= 0)
-        {
-            IniciarAtaque();
-            return;
+		
+		if(podeAtacar)
+		{
+			// Se esta na distancia de ataque e pode atacar, inicia ataque
+			if (distancia <= distanciaAtaque && !estaAtacando && !estaEsquivando && cooldownAtaque <= 0)
+			{
+				podeAtacar = false;
+				Invoke("IniciarAtaque", 1);
+				return;
+			}
         }
-        
-        // Calcula movimento para manter distancia ideal
-        CalcularMovimento(direcaoParaJogador, distancia);
+		
+        CalcularMovimento(direcaoParaJogador, distancia); // Calcula movimento para manter distancia ideal
     }
 
     // Calcula o movimento baseado na posicao do jogador
@@ -448,8 +408,24 @@ public class Inimigo : MonoBehaviour
         
         // Inicia a corrotina para ativar a area de ataque
         StartCoroutine(AtivarAreaDeAtaque());
+		
+		// Invoca o resfriamento entre ataques
+		int intervaloAtaque = 10 / nivel;
+		
+		if (intervaloAtaque < 1)
+		{
+			intervaloAtaque = 1;
+		}
+		
+		Invoke(ResfriamentoAtaque, intervaloAtaque)
     }
     
+	void ResfriamentoAtaque()
+	{
+		podeAtacar = true;
+	}
+		
+	
     // Cria um projetil se configurado
     void CriarProjetil()
     {
