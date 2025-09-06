@@ -14,17 +14,19 @@ public class Jogador : MonoBehaviour
     private int ultimaDirecao = -1;
     private bool ultimoEstaAtacando = false;
     private bool ultimoEstaEsquivando = false;
-    private bool estaAtacando = false; // Variavel para controlar se o jogador esta atacando
+    private bool precionouAtaque = false; // Variavel para controlar se o jogador esta atacando
+    private bool estaAcando = false;
     private bool estaEsquivando = false;// Variavel para controlar se o jogador esta esquivando
     private bool podeMover = true; // Variavel para controlar se o jogador pode se mover
     private float ultimaMagnitudeVelocidade = 0f;
 	private float horizontal; // Variavel para armazenar input horizontal
     private float vertical; // Variavel para armazenar input vertical
-    private float cooldownAtaque = 0.35f; // Variavel para controlar o cooldown entre ataques
+    private float cooldownAtaque = 0.85f; // Variavel para controlar o cooldown entre ataques
     private float tempoEsquiva = 0f; // Variavel para controlar o tempo de esquiva
     private float duracaoEsquiva = 0.3f; // Tempo de duracao da esquiva em segundos
     private float duracaoAtaque = 0.5f; // Tempo de duracao do ataque em segundos
-    public Transform projetil;
+
+    public Transform projetil; // Objeto projetil
     public float velocidadeMovimento = 5f; // Velocidade maxima de movimentacao do jogador
     public float forcaEsquiva = 10f; // Forca do impulso durante a esquiva
     public bool vivo;  // Variavel publica para saber se esta vivo ou morto
@@ -45,7 +47,8 @@ public class Jogador : MonoBehaviour
         
         areaDeAtaqueCollider = transform.Find("AreaDeAtaque").GetComponent<BoxCollider2D>(); // Encontra o objeto filho chamado "AreaDeAtaque" e obtem seu BoxCollider2D
         areaDeAtaque = GameObject.Find("AreaDeAtaque");
-        areaDeAtaqueCollider.enabled = false; // Desativa a colisao da area de ataque no inicio
+        //areaDeAtaqueCollider.enabled = false; // Desativa a colisao da area de ataque no inicio
+        areaDeAtaqueCollider.enabled = true;
 
         vidaAtual = vidaMaxima; // Inicializa a vida atual com o valor maximo
         vivo = true; // inicia o personagem vivo
@@ -63,7 +66,7 @@ public class Jogador : MonoBehaviour
 
         if (!vivo)
         {
-			//Destroy.this;
+            Destroy(transform.gameObject);
             return;
         }
 
@@ -117,7 +120,7 @@ public class Jogador : MonoBehaviour
 
     string GetNomeAnimacaoAtual()
     {
-        if (estaAtacando)
+        if (precionouAtaque)
         {
             switch (direcao)
             {
@@ -170,14 +173,14 @@ public class Jogador : MonoBehaviour
         AtualizarDirecao(); // Atualiza a direcao do jogador baseada nos inputs
         
         // Verifica se a tecla de esquiva (espaco) foi pressionada
-        if (Input.GetKeyDown(KeyCode.Space) && !estaEsquivando && !estaAtacando)
+        if (Input.GetKeyDown(KeyCode.Space) && !estaEsquivando && !precionouAtaque)
         {
             IniciarEsquiva();
             return;
         }
         
         // Verifica se a tecla de ataque (J) foi pressionada
-        if (Input.GetKeyDown(KeyCode.J) && !estaAtacando && !estaEsquivando && cooldownAtaque <= 0)
+        if (Input.GetKeyDown(KeyCode.J) && !precionouAtaque && !estaEsquivando && cooldownAtaque <= 0)
         {
             IniciarAtaque();
         }
@@ -187,7 +190,7 @@ public class Jogador : MonoBehaviour
     void Movimentar()
     {
         // Se esta atacando ou esquivando, nao permite movimento adicional
-        if (estaAtacando || estaEsquivando)
+        if (precionouAtaque || estaEsquivando)
         {
             return;
         }
@@ -257,7 +260,7 @@ public class Jogador : MonoBehaviour
 
         // Verifica se algum parametro relevante mudou
         if (ultimaDirecao != direcao ||
-            ultimoEstaAtacando != estaAtacando ||
+            ultimoEstaAtacando != precionouAtaque ||
             ultimoEstaEsquivando != estaEsquivando ||
             Mathf.Abs(ultimaMagnitudeVelocidade - corpo.linearVelocity.magnitude) > 0.1f)
         {
@@ -275,7 +278,7 @@ public class Jogador : MonoBehaviour
 
             // Atualiza os valores de referencia
             ultimaDirecao = direcao;
-            ultimoEstaAtacando = estaAtacando;
+            ultimoEstaAtacando = precionouAtaque;
             ultimoEstaEsquivando = estaEsquivando;
             ultimaMagnitudeVelocidade = corpo.linearVelocity.magnitude;
         }
@@ -285,7 +288,7 @@ public class Jogador : MonoBehaviour
     void AtualizarAnimacoes()
     {
         // Determina qual animacao deve ser reproduzida baseada no estado e direcao
-        if (estaAtacando)
+        if (precionouAtaque)
         {
             animador.SetBool("paradoCima", false);
             animador.SetBool("paradoBaixo", false);
@@ -422,31 +425,33 @@ public class Jogador : MonoBehaviour
     // Inicia a acao de ataque
     void IniciarAtaque()
     {
-        if (estaAtacando)
+        if (precionouAtaque)
         {
             return;
         }
 		
-        estaAtacando = true; // Marca que o jogador esta atacando
+        precionouAtaque = true; // Marca que o jogador esta atacando
         cooldownAtaque = duracaoAtaque; // Configura o cooldown do ataque
         quantidadeAtaques++; // Incrementa o contador de ataques
         podeMover = false; // Impede movimento durante o ataque
         corpo.linearVelocity = Vector2.zero; // Para o movimento do jogador
 
-        Invoke("AtivarAreaDeAtaque", 0.15f); // Aguarda um tempo antes de ativar a area de ataque
+        Invoke("AtivarAreaDeAtaque", 0.25f); // Aguarda um tempo antes de ativar a area de ataque
     }
 
     // Corrotina para ativar a area de ataque temporariamente
      void AtivarAreaDeAtaque()
     {
-        areaDeAtaqueCollider.enabled = true; // Ativa o collider da area de ataque
+        estaAcando = true;
+        // areaDeAtaqueCollider.enabled = true; // Ativa o collider da area de ataque
         Invoke("FinalizarAtaque", cooldownAtaque); // Aguarda um quarto de segundo antes de ativar a area de ataque
     }
 
     void FinalizarAtaque()
     {
-        areaDeAtaqueCollider.enabled = false; // Desativa o collider da area de ataque
-        estaAtacando = false; // Finaliza o ataque
+        estaAcando = false;
+        // areaDeAtaqueCollider.enabled = false; // Desativa o collider da area de ataque
+        precionouAtaque = false; // Finaliza o ataque
         podeMover = true; // Permite movimento novamente
     }
 	
@@ -454,20 +459,20 @@ public class Jogador : MonoBehaviour
     // Metodo chamado quando a area de ataque colide com outro objeto
     void OnTriggerStay2D(Collider2D outro)
     {
-        // Verifica se a area de ataque esta ativa
-        if (areaDeAtaqueCollider.enabled)
+        // Verifica se o objeto colidido e um inimigo
+        if (outro.gameObject.name.Contains("Inimigo"))
         {
-            // Verifica se o objeto colidido e um inimigo
-            if (outro.gameObject.name.Contains("Inimigo"))
+            if (estaAcando)
             {
                 // Tenta obter o script Inimigo do objeto colidido
                 Inimigo scriptInimigo = outro.gameObject.GetComponent<Inimigo>();
-                
+
                 // Se o objeto tem o script Inimigo, causa dano
                 if (scriptInimigo != null)
                 {
                     scriptInimigo.vidaAtual -= 1;
                 }
+
             }
         }
     }
@@ -502,7 +507,7 @@ public class Jogador : MonoBehaviour
         Debug.Log($"{estaVivo}");
         Debug.Log($"Estado: {GetNomeAnimacaoAtual()}");
         Debug.Log($"Velocidade: {corpo.linearVelocity.magnitude}");
-        Debug.Log($"Atacando: {estaAtacando}");
+        Debug.Log($"Atacando: {precionouAtaque}");
         Debug.Log($"Esquivando: {estaEsquivando}");
     }
 }

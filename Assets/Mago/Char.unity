@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 135695023}
   - component: {fileID: 135695022}
   m_Layer: 30
-  m_Name: AreaDeAtaque
+  m_Name: AreaDeAtaqueInimigo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -196,7 +196,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.2, y: 1.2}
   m_EdgeRadius: 0
 --- !u!212 &135695023
 SpriteRenderer:
@@ -265,7 +265,7 @@ GameObject:
   - component: {fileID: 245239912}
   - component: {fileID: 245239911}
   m_Layer: 30
-  m_Name: AreaDeAtaque
+  m_Name: AreaDeAtaqueInimigo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -330,7 +330,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.2, y: 1.2}
   m_EdgeRadius: 0
 --- !u!212 &245239912
 SpriteRenderer:
@@ -420,21 +420,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4687bea859412634385062b8fa8a1270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocidadeMaxima: 3
-  forcaEsquiva: 8
   vidaAtual: 5
   vidaMaxima: 5
   nivel: 1
-  distanciaManter: 3
-  distanciaAtaque: 1
-  ataqueCriaProjetil: 0
-  projetilPrefab: {fileID: 0}
-  deveFlanquear: 1
-  podeEsquivar: 1
-  frequenciaEsquiva: 9
   quantidadeEsquivas: 0
   quantidadeAtaques: 0
   quantidadeDanoRecebido: 0
+  velocidadeMaxima: 3
+  forcaEsquiva: 8
+  distanciaManter: 3
+  distanciaAtaque: 1
+  frequenciaEsquiva: 9
+  vivo: 0
+  ataqueCriaProjetil: 0
+  deveFlanquear: 1
+  podeEsquivar: 1
+  projetilPrefab: {fileID: 0}
+  areaDeAtaqueCollider: {fileID: 245239911}
 --- !u!50 &536813581
 Rigidbody2D:
   serializedVersion: 5
@@ -506,7 +508,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.1, y: 0.15}
+  m_Size: {x: 0.15, y: 0.2}
   m_EdgeRadius: 0
 --- !u!95 &536813583
 Animator:
@@ -594,7 +596,7 @@ Transform:
   m_GameObject: {fileID: 536813579}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.52, y: 5.65, z: 0}
+  m_LocalPosition: {x: -11.54, y: 4.04, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -980,21 +982,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4687bea859412634385062b8fa8a1270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocidadeMaxima: 3
-  forcaEsquiva: 8
   vidaAtual: 5
   vidaMaxima: 5
   nivel: 1
-  distanciaManter: 1.5
-  distanciaAtaque: 1
-  ataqueCriaProjetil: 0
-  projetilPrefab: {fileID: 0}
-  deveFlanquear: 0
-  podeEsquivar: 1
-  frequenciaEsquiva: 9
   quantidadeEsquivas: 0
   quantidadeAtaques: 0
   quantidadeDanoRecebido: 0
+  velocidadeMaxima: 3
+  forcaEsquiva: 8
+  distanciaManter: 1.5
+  distanciaAtaque: 1
+  frequenciaEsquiva: 9
+  vivo: 0
+  ataqueCriaProjetil: 0
+  deveFlanquear: 0
+  podeEsquivar: 1
+  projetilPrefab: {fileID: 0}
+  areaDeAtaqueCollider: {fileID: 135695022}
 --- !u!50 &801385047
 Rigidbody2D:
   serializedVersion: 5
@@ -1066,7 +1070,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.1, y: 0.15}
+  m_Size: {x: 0.15, y: 0.2}
   m_EdgeRadius: 0
 --- !u!95 &801385049
 Animator:
@@ -1154,7 +1158,7 @@ Transform:
   m_GameObject: {fileID: 801385045}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 14.04, y: 2.91, z: 0}
+  m_LocalPosition: {x: 11.55, y: 4.18, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1323,7 +1327,7 @@ GameObject:
   - component: {fileID: 1035163860}
   - component: {fileID: 1035163859}
   m_Layer: 30
-  m_Name: AreaDeAtaque
+  m_Name: AreaDeAtaqueInimigo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1388,7 +1392,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.2, y: 1.2}
   m_EdgeRadius: 0
 --- !u!212 &1035163860
 SpriteRenderer:
@@ -1612,21 +1616,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4687bea859412634385062b8fa8a1270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocidadeMaxima: 3
-  forcaEsquiva: 8
   vidaAtual: 5
   vidaMaxima: 5
   nivel: 5
-  distanciaManter: 1
-  distanciaAtaque: 1
-  ataqueCriaProjetil: 0
-  projetilPrefab: {fileID: 0}
-  deveFlanquear: 0
-  podeEsquivar: 0
-  frequenciaEsquiva: 9
   quantidadeEsquivas: 0
   quantidadeAtaques: 0
   quantidadeDanoRecebido: 0
+  velocidadeMaxima: 3
+  forcaEsquiva: 8
+  distanciaManter: 1
+  distanciaAtaque: 1
+  frequenciaEsquiva: 9
+  vivo: 0
+  ataqueCriaProjetil: 0
+  deveFlanquear: 0
+  podeEsquivar: 0
+  projetilPrefab: {fileID: 0}
+  areaDeAtaqueCollider: {fileID: 1035163859}
 --- !u!50 &1941588021
 Rigidbody2D:
   serializedVersion: 5
@@ -1698,7 +1704,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.1, y: 0.15}
+  m_Size: {x: 0.15, y: 0.2}
   m_EdgeRadius: 0
 --- !u!95 &1941588023
 Animator:

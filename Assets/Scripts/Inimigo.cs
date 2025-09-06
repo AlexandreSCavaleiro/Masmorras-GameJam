@@ -6,7 +6,6 @@ public class Inimigo : MonoBehaviour
 {
     private Rigidbody2D corpo; // Referencia para o componente Rigidbody2D do inimigo
     private Animator animador; // Referencia para o componente Animator do inimigo
-    private BoxCollider2D areaDeAtaqueCollider; // Referencia para o BoxCollider2D da area de ataque (objeto filho)
     private Transform alvoJogador; // Referencia para o transform do jogador para perseguicao
 	
     private int direcao = 1; // Variavel para armazenar a direcao atual do inimigo (0: cima, 1: baixo, 2: esquerda, 3: direita)
@@ -46,18 +45,19 @@ public class Inimigo : MonoBehaviour
     public bool podeEsquivar = false; // Define se o inimigo pode esquivar
     
 	public GameObject projetilPrefab; // Prefab do projetil caso ataque crie projetilnco
+    public BoxCollider2D areaDeAtaqueCollider; // Referencia para o BoxCollider2D da area de ataque (objeto filho)
 
-	
     // Tempo que a area de ataque fica ativa durante o ataque
     // private float tempoAreaAtaqueAtiva = 0.25f;
-    
+
     // Metodo chamado quando o script e inicializado
     void Start()
     {
         corpo = GetComponent<Rigidbody2D>(); // Obtem o componente Rigidbody2D do GameObject
         animador = GetComponent<Animator>(); // Obtem o componente Animator do GameObject
-        areaDeAtaqueCollider = transform.Find("AreaDeAtaque").GetComponent<BoxCollider2D>(); // Encontra o objeto filho chamado "AreaDeAtaque" e obtem seu BoxCollider2D
+        // areaDeAtaqueCollider = transform.Find("AreaDeAtaque").GetComponent<BoxCollider2D>(); // Encontra o objeto filho chamado "AreaDeAtaque" e obtem seu BoxCollider2D
         areaDeAtaqueCollider.enabled = false; // Desativa a colisao da area de ataque no inicio
+        vivo = true;
         vidaMaxima = nivel;
         vidaAtual = vidaMaxima; // Inicializa a vida atual com o valor maximo
         danoAplicavel = nivel; // Quantidade de dano conforme o nível
@@ -90,7 +90,8 @@ public class Inimigo : MonoBehaviour
 
 		if (!vivo)
 		{
-			// Destroy.this;
+            Destroy(transform.gameObject);
+            return;
 		}
 		
         // Se o inimigo pode se mover e tem alvo, processa as decisoes
@@ -459,6 +460,14 @@ public class Inimigo : MonoBehaviour
         {
             rbProjetil.AddForce(direcaoProjetil * 10f, ForceMode2D.Impulse);
         }
+
+        Invoke("FinalizarAtaque", 2);
+    }
+
+    void FinalizarAtaque()
+    {
+        // Finaliza o ataque
+        estaAtacando = false;
     }
 
     // Corrotina para ativar a area de ataque temporariamente
@@ -475,9 +484,6 @@ public class Inimigo : MonoBehaviour
         
         // Desativa o collider da area de ataque
         areaDeAtaqueCollider.enabled = false;
-        
-        // Finaliza o ataque
-        estaAtacando = false;
         
         // Permite movimento novamente
         podeMover = true;
