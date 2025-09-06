@@ -21,7 +21,7 @@ public class Jogador : MonoBehaviour
     private float ultimaMagnitudeVelocidade = 0f;
 	private float horizontal; // Variavel para armazenar input horizontal
     private float vertical; // Variavel para armazenar input vertical
-    private float cooldownAtaque = 0.85f; // Variavel para controlar o cooldown entre ataques
+    private float cooldownAtaque = 1.5f; // Variavel para controlar o cooldown entre ataques
     private float tempoEsquiva = 0f; // Variavel para controlar o tempo de esquiva
     private float duracaoEsquiva = 0.3f; // Tempo de duracao da esquiva em segundos
     private float duracaoAtaque = 0.5f; // Tempo de duracao do ataque em segundos
@@ -49,7 +49,7 @@ public class Jogador : MonoBehaviour
         areaDeAtaque = GameObject.Find("AreaDeAtaque");
         //areaDeAtaqueCollider.enabled = false; // Desativa a colisao da area de ataque no inicio
         areaDeAtaqueCollider.enabled = true;
-
+        direcao = 1;
         vidaAtual = vidaMaxima; // Inicializa a vida atual com o valor maximo
         vivo = true; // inicia o personagem vivo
         focaAtaque = 1; // Foca de ataque inicial
@@ -90,11 +90,6 @@ public class Jogador : MonoBehaviour
     // Metodo chamado em intervalos fixos de tempo para fisica
     void FixedUpdate()
     {
-        if (!vivo)
-        {
-            return;
-        }
-
         // Se o jogador pode se mover, executa a movimentacao
         if (podeMover)
         {
@@ -180,7 +175,7 @@ public class Jogador : MonoBehaviour
         }
         
         // Verifica se a tecla de ataque (J) foi pressionada
-        if (Input.GetKeyDown(KeyCode.J) && !precionouAtaque && !estaEsquivando && cooldownAtaque <= 0)
+        if (Input.GetKeyDown(KeyCode.Return) && !precionouAtaque && !estaEsquivando && cooldownAtaque <= 0)
         {
             IniciarAtaque();
         }
