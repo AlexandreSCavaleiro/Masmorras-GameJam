@@ -326,7 +326,7 @@ public class Jogador : MonoBehaviour
             switch (direcao)
             {
                 case 0: SetAnimacaoUnica("esquivandoCima"); animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoEsq", false);  animador.SetBool("esquivandoDir", false); break;
-                case 1: SetAnimacaoUnica("esquivandoBaixo"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoEsq", false);  animador.SetBool("esquivandoDir"false); break;
+                case 1: SetAnimacaoUnica("esquivandoBaixo"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoEsq", false);  animador.SetBool("esquivandoDir", false); break;
                 case 2: SetAnimacaoUnica("esquivandoEsq"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoDir", false); break;
                 case 3: SetAnimacaoUnica("esquivandoDir"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoEsq", false); break;
             }
@@ -406,7 +406,7 @@ public class Jogador : MonoBehaviour
         }
 
         corpo.AddForce(direcaoEsquiva * forcaEsquiva, ForceMode2D.Impulse); // Aplica forca de impulso na esquiva
-        corpo.enabled = false; // transform.GetComponent<Rigidbody2D>().enabled = false // Desativar Rigidbody
+        transform.GetComponent<BoxCollider2D>().enabled = false; // Desativar colisao
     }
 
     // Finaliza a acao de esquiva
@@ -414,7 +414,7 @@ public class Jogador : MonoBehaviour
     {
         estaEsquivando = false; // Marca que o jogador nao esta mais esquivando
         podeMover = true; // Permite movimento novamente
-        corpo.enabled = true; // transform.GetComponent<Rigidbody2D>().enabled = true // reativar rigidbody
+        transform.GetComponent<BoxCollider2D>().enabled = true; // reativar colisao
         corpo.linearVelocity = Vector2.zero; // Para o movimento residual da esquiva
     }
 
@@ -501,7 +501,7 @@ public class Jogador : MonoBehaviour
         Debug.Log($"{estaVivo}");
         Debug.Log($"Estado: {GetNomeAnimacaoAtual()}");
         Debug.Log($"Velocidade: {corpo.linearVelocity.magnitude}");
-        Debug.Log($"Atacando: {estaAtacando}")
+        Debug.Log($"Atacando: {estaAtacando}");
         Debug.Log($"Esquivando: {estaEsquivando}");
     }
 }
