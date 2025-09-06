@@ -40,6 +40,7 @@ public class Inimigo : MonoBehaviour
     public float distanciaAtaque = 1.5f; // Distancia minima para iniciar ataque
     public float frequenciaEsquiva = 0.3f; // Frequencia de esquiva (0-1, onde 1 = sempre esquiva)
 	
+    public bool vivo;
     public bool ataqueCriaProjetil = false; // Define se o inimigo deve criar projetil ao atacar
     public bool deveFlanquear = false; // Define se o inimigo deve flanquear o jogador
     public bool podeEsquivar = false; // Define se o inimigo pode esquivar
@@ -89,7 +90,7 @@ public class Inimigo : MonoBehaviour
 
 		if (!vivo)
 		{
-			Destroy.this;
+			// Destroy.this;
 		}
 		
         // Se o inimigo pode se mover e tem alvo, processa as decisoes
@@ -416,8 +417,8 @@ public class Inimigo : MonoBehaviour
 		{
 			intervaloAtaque = 1;
 		}
-		
-		Invoke(ResfriamentoAtaque, intervaloAtaque)
+
+        Invoke("ResfriamentoAtaque", intervaloAtaque);
     }
     
 	void ResfriamentoAtaque()
