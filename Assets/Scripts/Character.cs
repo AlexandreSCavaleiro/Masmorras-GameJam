@@ -21,15 +21,15 @@ public class Character : MonoBehaviour
 
     private void FixedUpdate()
     {
+        animarChar(horizontal,vertical);
         MovePlayer();
         
     }
 
     void GetInputs()
     {
-        horizontal = Input.GetAxis("Horizontal");
-        vertical = Input.GetAxis("Vertical");
-        animarChar(horizontal,vertical);
+        horizontal = Input.GetAxisRaw("Horizontal");
+        vertical = Input.GetAxisRaw("Vertical");
     }
 
     void MovePlayer()
@@ -53,13 +53,14 @@ public class Character : MonoBehaviour
             animator.SetBool("IDLE", false);
             animator.SetBool("WALKING", true);
         }
-       
+
         /*
          * 0 up
          * 1 down
          * 2 left
          * 3 rigth
          */
+
         if (vertical > 0) //up
         {
             animator.SetInteger("Direction", 0);
