@@ -4,9 +4,8 @@ using System.Collections;
 // Controla movimento, animacoes, esquiva, ataque e sistema de vida
 public class Jogador : MonoBehaviour
 {
-    
+
     private Rigidbody2D corpo; // Referencia para o componente Rigidbody2D do jogador
-    private BoxCollider2D contato; // Area de contato do comrpo do personagem
     private Animator animador; // Referencia para o componente Animator do jogador
     private GameObject areaDeAtaque; // Referencia para area de ataque (objeto filho)
     private BoxCollider2D areaDeAtaqueCollider; // Referencia para o BoxCollider2D da area de ataque (objeto filho)
@@ -19,7 +18,7 @@ public class Jogador : MonoBehaviour
     private bool estaEsquivando = false;// Variavel para controlar se o jogador esta esquivando
     private bool podeMover = true; // Variavel para controlar se o jogador pode se mover
     private float ultimaMagnitudeVelocidade = 0f;
-	private float horizontal; // Variavel para armazenar input horizontal
+    private float horizontal; // Variavel para armazenar input horizontal
     private float vertical; // Variavel para armazenar input vertical
     private float cooldownAtaque = 1.5f; // Variavel para controlar o cooldown entre ataques
     private float tempoEsquiva = 0f; // Variavel para controlar o tempo de esquiva
@@ -30,8 +29,10 @@ public class Jogador : MonoBehaviour
     public float velocidadeMovimento = 5f; // Velocidade maxima de movimentacao do jogador
     public float forcaEsquiva = 10f; // Forca do impulso durante a esquiva
     public bool vivo;  // Variavel publica para saber se esta vivo ou morto
+    public bool fimdejogo = false;
     public int vidaAtual = 10; // Vida atual do jogador
     public int vidaMaxima = 10; // Vida maxima do jogador
+    public int Pontuacao = 0;
     public int focaAtaque; // Foca de ataque do jogador
     public int quantidadeEsquivas = 0; // Contador de vezes que o jogador esquivou
     public int quantidadeAtaques = 0; // Contador de vezes que o jogador atacou
@@ -40,11 +41,10 @@ public class Jogador : MonoBehaviour
 
     // Metodo chamado quando o script e inicializado
     void Start()
-    {        
+    {
         corpo = GetComponent<Rigidbody2D>(); // Obtem o componente Rigidbody2D do GameObject
-        contato = GetComponent<BoxCollider2D>();
         animador = GetComponent<Animator>(); // Obtem o componente Animator do GameObject
-        
+
         areaDeAtaqueCollider = transform.Find("AreaDeAtaque").GetComponent<BoxCollider2D>(); // Encontra o objeto filho chamado "AreaDeAtaque" e obtem seu BoxCollider2D
         areaDeAtaque = GameObject.Find("AreaDeAtaque");
         //areaDeAtaqueCollider.enabled = false; // Desativa a colisao da area de ataque no inicio
@@ -53,7 +53,7 @@ public class Jogador : MonoBehaviour
         vidaAtual = vidaMaxima; // Inicializa a vida atual com o valor maximo
         vivo = true; // inicia o personagem vivo
         focaAtaque = 1; // Foca de ataque inicial
-	}
+    }
 
     // Metodo chamado a cada frame
     void Update()
@@ -63,6 +63,9 @@ public class Jogador : MonoBehaviour
         {
             vidaAtual = 0;
         }
+
+        // Verifica constantemente se o jogo terminou
+        VerificarFimDeJogo();
 
         if (!vivo)
         {
@@ -75,7 +78,7 @@ public class Jogador : MonoBehaviour
         {
             ProcessarEntradas();
         }
-		
+
         if (vidaAtual == 0)
         {
 
@@ -84,7 +87,7 @@ public class Jogador : MonoBehaviour
 
         VerificarMudancasEstado(); // Verifica mudancas de estado para atualizar animacoes
 
-        
+
     }
 
     // Metodo chamado em intervalos fixos de tempo para fisica
@@ -95,13 +98,13 @@ public class Jogador : MonoBehaviour
         {
             Movimentar();
         }
-		
+
         // Gerencia o cooldown do ataque
         if (cooldownAtaque > 0)
         {
             cooldownAtaque -= Time.deltaTime;
         }
-        
+
         // Gerencia o tempo de esquiva
         if (estaEsquivando)
         {
@@ -112,6 +115,37 @@ public class Jogador : MonoBehaviour
             }
         }
     }
+
+    private void VerificarFimDeJogo()
+    {
+        // Verifica se a vida do jogador chegou a zero ou se o jogo terminou por outros criterios
+        if (!vivo || fimdejogo)
+        {
+            // Busca o canvas FimDeJogo que e filho do GameObject Jogador
+            Transform canvasFimDeJogo = transform.Find("FimDeJogo");
+
+            if (canvasFimDeJogo != null)
+            {
+                // Obtem o componente FimDeJogo do canvas
+                FimDeJogo scriptFimDeJogo = canvasFimDeJogo.GetComponent<FimDeJogo>();
+
+                if (scriptFimDeJogo != null)
+                {
+                    // Chama o metodo para iniciar o questionario
+                    scriptFimDeJogo.IniciarQuestionario();
+                }
+                else
+                {
+                    Debug.LogError("Script FimDeJogo nao encontrado no canvas filho");
+                }
+            }
+            else
+            {
+                Debug.LogError("Canvas FimDeJogo nao encontrado como filho do Jogador");
+            }
+        }
+    }
+
 
     string GetNomeAnimacaoAtual()
     {
@@ -164,16 +198,16 @@ public class Jogador : MonoBehaviour
     {
         horizontal = Input.GetAxisRaw("Horizontal"); // Obtem input horizontal (A/D ou setas horizontais)
         vertical = Input.GetAxisRaw("Vertical"); // Obtem input vertical (W/S ou setas verticais)
-        
+
         AtualizarDirecao(); // Atualiza a direcao do jogador baseada nos inputs
-        
+
         // Verifica se a tecla de esquiva (espaco) foi pressionada
         if (Input.GetKeyDown(KeyCode.Space) && !estaEsquivando && !precionouAtaque)
         {
             IniciarEsquiva();
             return;
         }
-        
+
         // Verifica se a tecla de ataque (J) foi pressionada
         if (Input.GetKeyDown(KeyCode.Return) && !precionouAtaque && !estaEsquivando && cooldownAtaque <= 0)
         {
@@ -191,13 +225,13 @@ public class Jogador : MonoBehaviour
         }
 
         Vector2 movimento = new Vector2(horizontal, vertical); // Cria um vetor de movimento baseado nos inputs
-        
+
         // Normaliza o vetor para movimento diagonal nao ser mais rapido
         if (movimento.magnitude > 1)
         {
             movimento.Normalize();
         }
-		
+
         corpo.linearVelocity = movimento * velocidadeMovimento; // Aplica a velocidade ao Rigidbody2D
 
         if (!vivo)
@@ -215,7 +249,7 @@ public class Jogador : MonoBehaviour
         {
             return;
         }
-        
+
         // Prioridade: vertical sobre horizontal para direcoes diagonais
         if (vertical != 0)
         {
@@ -249,7 +283,7 @@ public class Jogador : MonoBehaviour
         }
     }
 
-	private void VerificarMudancasEstado()
+    private void VerificarMudancasEstado()
     {
         bool estadoMudou = false;
 
@@ -300,10 +334,10 @@ public class Jogador : MonoBehaviour
 
             switch (direcao)
             {
-                case 0: SetAnimacaoUnica("atacandoCima"); animador.SetBool("atacandoBaixo", false);  animador.SetBool("atacandoEsq", false);  animador.SetBool("atacandoDir", false); break;
-                case 1: SetAnimacaoUnica("atacandoBaixo"); animador.SetBool("atacandoCima", false);  animador.SetBool("atacandoEsq", false);  animador.SetBool("atacandoDir", false); break;
-                case 2: SetAnimacaoUnica("atacandoEsq"); animador.SetBool("atacandoCima", false);  animador.SetBool("atacandoBaixo", false);  animador.SetBool("atacandoDir", false); break;
-                case 3: SetAnimacaoUnica("atacandoDir"); animador.SetBool("atacandoCima", false);  animador.SetBool("atacandoBaixo", false);  animador.SetBool("atacandoEsq", false); break;
+                case 0: SetAnimacaoUnica("atacandoCima"); animador.SetBool("atacandoBaixo", false); animador.SetBool("atacandoEsq", false); animador.SetBool("atacandoDir", false); break;
+                case 1: SetAnimacaoUnica("atacandoBaixo"); animador.SetBool("atacandoCima", false); animador.SetBool("atacandoEsq", false); animador.SetBool("atacandoDir", false); break;
+                case 2: SetAnimacaoUnica("atacandoEsq"); animador.SetBool("atacandoCima", false); animador.SetBool("atacandoBaixo", false); animador.SetBool("atacandoDir", false); break;
+                case 3: SetAnimacaoUnica("atacandoDir"); animador.SetBool("atacandoCima", false); animador.SetBool("atacandoBaixo", false); animador.SetBool("atacandoEsq", false); break;
             }
             return;
         }
@@ -324,10 +358,10 @@ public class Jogador : MonoBehaviour
 
             switch (direcao)
             {
-                case 0: SetAnimacaoUnica("esquivandoCima"); animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoEsq", false);  animador.SetBool("esquivandoDir", false); break;
-                case 1: SetAnimacaoUnica("esquivandoBaixo"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoEsq", false);  animador.SetBool("esquivandoDir", false); break;
-                case 2: SetAnimacaoUnica("esquivandoEsq"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoDir", false); break;
-                case 3: SetAnimacaoUnica("esquivandoDir"); animador.SetBool("esquivandoCima", false);  animador.SetBool("esquivandoBaixo", false);  animador.SetBool("esquivandoEsq", false); break;
+                case 0: SetAnimacaoUnica("esquivandoCima"); animador.SetBool("esquivandoBaixo", false); animador.SetBool("esquivandoEsq", false); animador.SetBool("esquivandoDir", false); break;
+                case 1: SetAnimacaoUnica("esquivandoBaixo"); animador.SetBool("esquivandoCima", false); animador.SetBool("esquivandoEsq", false); animador.SetBool("esquivandoDir", false); break;
+                case 2: SetAnimacaoUnica("esquivandoEsq"); animador.SetBool("esquivandoCima", false); animador.SetBool("esquivandoBaixo", false); animador.SetBool("esquivandoDir", false); break;
+                case 3: SetAnimacaoUnica("esquivandoDir"); animador.SetBool("esquivandoCima", false); animador.SetBool("esquivandoBaixo", false); animador.SetBool("esquivandoEsq", false); break;
             }
             return;
         }
@@ -348,10 +382,10 @@ public class Jogador : MonoBehaviour
 
             switch (direcao)
             {
-                case 0: SetAnimacaoUnica("andandoCima"); animador.SetBool("andandoBaixo", false);  animador.SetBool("andandoEsq", false);  animador.SetBool("andandoDir", false); break;
-                case 1: SetAnimacaoUnica("andandoBaixo"); animador.SetBool("andandoCima", false);  animador.SetBool("andandoEsq", false);  animador.SetBool("andandoDir", false); break;
-                case 2: SetAnimacaoUnica("andandoEsq"); animador.SetBool("andandoCima", false);  animador.SetBool("andandoBaixo", false);  animador.SetBool("andandoDir", false); break;
-                case 3: SetAnimacaoUnica("andandoDir"); animador.SetBool("andandoCima", false);  animador.SetBool("andandoBaixo", false);  animador.SetBool("andandoEsq", false); break;
+                case 0: SetAnimacaoUnica("andandoCima"); animador.SetBool("andandoBaixo", false); animador.SetBool("andandoEsq", false); animador.SetBool("andandoDir", false); break;
+                case 1: SetAnimacaoUnica("andandoBaixo"); animador.SetBool("andandoCima", false); animador.SetBool("andandoEsq", false); animador.SetBool("andandoDir", false); break;
+                case 2: SetAnimacaoUnica("andandoEsq"); animador.SetBool("andandoCima", false); animador.SetBool("andandoBaixo", false); animador.SetBool("andandoDir", false); break;
+                case 3: SetAnimacaoUnica("andandoDir"); animador.SetBool("andandoCima", false); animador.SetBool("andandoBaixo", false); animador.SetBool("andandoEsq", false); break;
             }
             return;
         }
@@ -372,18 +406,18 @@ public class Jogador : MonoBehaviour
 
             switch (direcao)
             {
-                case 0: SetAnimacaoUnica("paradoCima"); animador.SetBool("paradoBaixo", false);  animador.SetBool("paradoEsq", false);  animador.SetBool("paradoDir", false); break;
-                case 1: SetAnimacaoUnica("paradoBaixo"); animador.SetBool("paradoCima", false);  animador.SetBool("paradoEsq", false);  animador.SetBool("paradoDir", false); break;
-                case 2: SetAnimacaoUnica("paradoEsq"); animador.SetBool("paradoCima", false);  animador.SetBool("paradoBaixo", false);  animador.SetBool("paradoDir", false); break;
-                case 3: SetAnimacaoUnica("paradoDir"); animador.SetBool("paradoCima", false);  animador.SetBool("paradoBaixo", false);  animador.SetBool("paradoEsq", false); break;
+                case 0: SetAnimacaoUnica("paradoCima"); animador.SetBool("paradoBaixo", false); animador.SetBool("paradoEsq", false); animador.SetBool("paradoDir", false); break;
+                case 1: SetAnimacaoUnica("paradoBaixo"); animador.SetBool("paradoCima", false); animador.SetBool("paradoEsq", false); animador.SetBool("paradoDir", false); break;
+                case 2: SetAnimacaoUnica("paradoEsq"); animador.SetBool("paradoCima", false); animador.SetBool("paradoBaixo", false); animador.SetBool("paradoDir", false); break;
+                case 3: SetAnimacaoUnica("paradoDir"); animador.SetBool("paradoCima", false); animador.SetBool("paradoBaixo", false); animador.SetBool("paradoEsq", false); break;
             }
         }
     }
 
-	private void SetAnimacaoUnica(string animacaoAtual)
-	{
-		// Ativa apenas a animacao desejada
-		animador.SetBool(animacaoAtual, true);
+    private void SetAnimacaoUnica(string animacaoAtual)
+    {
+        // Ativa apenas a animacao desejada
+        animador.SetBool(animacaoAtual, true);
     }
 
     // Inicia a acao de esquiva
@@ -395,7 +429,7 @@ public class Jogador : MonoBehaviour
         tempoEsquiva = duracaoEsquiva; // Configura o tempo de duracao da esquiva
         quantidadeEsquivas++; // Incrementa o contador de esquivas
         Vector2 direcaoEsquiva = Vector2.zero; // Aplica um impulso na direcao atual
-        
+
         switch (direcao)
         {
             case 0: direcaoEsquiva = Vector2.up; break;
@@ -424,7 +458,7 @@ public class Jogador : MonoBehaviour
         {
             return;
         }
-		
+
         precionouAtaque = true; // Marca que o jogador esta atacando
         cooldownAtaque = duracaoAtaque; // Configura o cooldown do ataque
         quantidadeAtaques++; // Incrementa o contador de ataques
@@ -435,7 +469,7 @@ public class Jogador : MonoBehaviour
     }
 
     // Corrotina para ativar a area de ataque temporariamente
-     void AtivarAreaDeAtaque()
+    void AtivarAreaDeAtaque()
     {
         estaAcando = true;
         // areaDeAtaqueCollider.enabled = true; // Ativa o collider da area de ataque
@@ -449,8 +483,8 @@ public class Jogador : MonoBehaviour
         precionouAtaque = false; // Finaliza o ataque
         podeMover = true; // Permite movimento novamente
     }
-	
-    
+
+
     // Metodo chamado quando a area de ataque colide com outro objeto
     void OnTriggerStay2D(Collider2D outro)
     {
@@ -478,7 +512,7 @@ public class Jogador : MonoBehaviour
     {
         // Reduz a vida atual
         vidaAtual -= quantidade;
-        
+
         // Incrementa o contador de dano recebido
         quantidadeDanoRecebido++;
     }
@@ -488,7 +522,7 @@ public class Jogador : MonoBehaviour
     {
         // Aumenta a vida atual
         vidaAtual += quantidade;
-        
+
         // Garante que a vida nao ultrapasse o maximo
         if (vidaAtual > vidaMaxima)
         {
@@ -496,8 +530,15 @@ public class Jogador : MonoBehaviour
         }
     }
 
+    // Metodo para adicionar pontos ao jogador
+    public void AdicionarPontos(int quantidade)
+    {
+        // Aumenta a vida atual
+        Pontuacao += quantidade;
+    }
+
     void Debugando()
-    {  
+    {
         string estaVivo = vivo == true ? "Esta vivo" : "Morreu!";
         Debug.Log($"{estaVivo}");
         Debug.Log($"Estado: {GetNomeAnimacaoAtual()}");
