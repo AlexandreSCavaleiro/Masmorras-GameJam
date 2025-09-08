@@ -1,5 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using static UnityEngine.GraphicsBuffer;
 
 public class Character : MonoBehaviour
 {
@@ -77,9 +79,17 @@ public class Character : MonoBehaviour
             animator.SetInteger("Direction", 3);
         }
 
-        Debug.Log($"direction {animator.GetInteger("Direction")} | {horizontal}/{vertical} | idle: {animator.GetBool("IDLE")} | Walking: {animator.GetBool("WALKING")}");
+        //Debug.Log($"direction {animator.GetInteger("Direction")} | {horizontal}/{vertical} | idle: {animator.GetBool("IDLE")} | Walking: {animator.GetBool("WALKING")}");
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision == null) return;
+        if (collision.gameObject.name.Contains("Sala"))
+        {
+            GameObject.FindWithTag("MainCamera").gameObject.GetComponent
+        } 
+    }
 
 }
     
