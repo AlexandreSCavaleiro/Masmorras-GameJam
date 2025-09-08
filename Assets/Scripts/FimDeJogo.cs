@@ -15,6 +15,8 @@ public class FimDeJogo : MonoBehaviour
     // Array para armazenar os botoes de resposta numerica (1 a 5)
     public Button[] botoesResposta;
 
+    GameObject jogadorObj;
+
     // Variavel para controlar o indice da pergunta atual
     private int perguntaAtual = 0;
     // Lista para armazenar as respostas do usuario
@@ -41,6 +43,18 @@ public class FimDeJogo : MonoBehaviour
         // Busca automaticamente as referencias dos componentes
         BuscarReferenciasAutomaticamente();
 
+        canvasQuestionario.gameObject.SetActive(false);
+        textoamostra.gameObject.SetActive(false);
+        txtInsert.gameObject.SetActive(false);
+
+        // Busca o objeto do jogador e coleta seus dados
+        jogadorObj = GameObject.Find("Jogador");
+
+        if (jogadorObj == null)
+        {
+            jogadorObj = GameObject.FindGameObjectWithTag("Player"); // Encontra o jogador na cena pela tag
+        }
+
         // Inicialmente desativa todos os botoes de resposta
         foreach (Button btn in botoesResposta)
         {
@@ -50,63 +64,50 @@ public class FimDeJogo : MonoBehaviour
         txtInsert.onEndEdit.AddListener(HandleTextInput);
     }
 
-    // Metodo para buscar automaticamente as referencias dos componentes
-    private void BuscarReferenciasAutomaticamente()
-    {
-        // Busca o canvas dentro do objeto atual
-        canvasQuestionario = GetComponent<Canvas>();
-
-        // Busca o componente Text com o nome especifico
-        textoamostra = GameObject.Find("textoamostra").GetComponent<Text>();
-
-        // Busca o InputField com o nome especifico
-        txtInsert = GameObject.Find("txtInsert").GetComponent<InputField>();
-
-        // Busca e armazena todos os botoes com os nomes B_1 a B_5
-        botoesResposta = new Button[5];
-        for (int i = 0; i < 5; i++)
-        {
-            botoesResposta[i] = GameObject.Find($"B_{i + 1}").GetComponent<Button>();
-        }
-
-        // Log de verificacao para debug
-        Debug.Log("Referencias buscadas automaticamente: " +
-                  (canvasQuestionario != null) + " " +
-                  (textoamostra != null) + " " +
-                  (txtInsert != null) + " " +
-                  (botoesResposta.Length == 5));
-    }
-
     // Metodo publico para ser chamado por outro script quando o jogo termina
     public void IniciarQuestionario()
     {
-        // Busca o objeto do jogador e coleta seus dados
-        GameObject jogadorObj = GameObject.Find("Jogador");
+        perguntaAtual = 0;
+        respostas.Clear();
+
+        canvasQuestionario.gameObject.SetActive(true);
+        textoamostra.gameObject.SetActive(true);
+        txtInsert.gameObject.SetActive(true);
+
         if (jogadorObj != null)
         {
             Jogador jogadorScript = jogadorObj.GetComponent<Jogador>();
-            dadosJogador = $"{jogadorScript.Pontuacao},{jogadorScript.quantidadeEsquivas},{jogadorScript.quantidadeAtaques},{jogadorScript.quantidadeDanoRecebido}";
+            if (jogadorScript != null)
+            {
+                dadosJogador = $"{jogadorScript.Pontuacao},{jogadorScript.quantidadeEsquivas},{jogadorScript.quantidadeAtaques},{jogadorScript.quantidadeDanoRecebido}";
+            }
         }
 
-        // Ativa o canvas do questionario
-        canvasQuestionario.gameObject.SetActive(true);
         // Define o texto inicial baseado na vida do jogador
-        textoamostra.text = GameObject.Find("Jogador").GetComponent<Jogador>().vidaAtual == 0 ?
-            "Voce falhou, mas toda jornada tem seus obstaculos. Tente novamente! Queremos ouvir sua voz: " :
-            "Parabens pela sua determinacao! Sua opiniao e valiosa: ";
-        // Adiciona o convite para o questionario
-        textoamostra.text += "Por favor, responda um questionario rapido iniciando pelo seu nome.";
+        bool jogadorVivo = jogadorObj != null && jogadorObj.GetComponent<Jogador>().vidaAtual > 0;
+        textoamostra.text = jogadorVivo ?
+            "Parabens pela sua determinacao! Sua opiniao e valiosa: " :
+            "Voce falhou, mas toda jornada tem seus obstaculos. Tente novamente! Queremos ouvir sua voz: ";
+
+        // Mostra a primeira pergunta
+        textoamostra.text += "\n\n" + perguntas[perguntaAtual];
+
+        // Ativa apenas o campo de texto para a primeira pergunta
+        txtInsert.gameObject.SetActive(true);
+        foreach (Button btn in botoesResposta)
+        {
+            btn.gameObject.SetActive(false);
+        }
     }
 
     // Manipula a entrada de texto do usuario
     private void HandleTextInput(string input)
     {
-        if (!string.IsNullOrEmpty(input) && Input.GetKey(KeyCode.Return))
+        if (!string.IsNullOrEmpty(input) && (Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter)))
         {
             respostas.Add(input);
-            AvancarPergunta();
             txtInsert.text = "";
-            txtInsert.gameObject.SetActive(false);
+            AvancarPergunta();
         }
     }
 
@@ -127,9 +128,19 @@ public class FimDeJogo : MonoBehaviour
         // Ativa botoes para perguntas de multipla escolha (pergunta 2 em diante)
         if (perguntaAtual >= 2)
         {
+            txtInsert.gameObject.SetActive(false);
             foreach (Button btn in botoesResposta)
             {
                 btn.gameObject.SetActive(true);
+            }
+        }
+        else
+        {
+            // Para a segunda pergunta (idade), mantem o campo de texto
+            txtInsert.gameObject.SetActive(true);
+            foreach (Button btn in botoesResposta)
+            {
+                btn.gameObject.SetActive(false);
             }
         }
     }
@@ -144,17 +155,63 @@ public class FimDeJogo : MonoBehaviour
     // Salva os dados no arquivo CSV
     private void SalvarDados()
     {
-        string caminho = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "Feedbacs_MagoAle.csv");
-        bool arquivoExiste = File.Exists(caminho);
-
-        using (StreamWriter writer = new StreamWriter(caminho, true))
+        try
         {
-            if (!arquivoExiste)
+            string caminho = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "Feedbacs_MagoAle.csv");
+            bool arquivoExiste = File.Exists(caminho);
+
+            using (StreamWriter writer = new StreamWriter(caminho, true))
             {
-                writer.WriteLine("Pontuacao,Esquivas,Ataques,DanoRecebido,Nome,Idade,Diversao,Dificuldade,Objetivos,Visual,Jogabilidade,Bugs,Indicacao");
+                if (!arquivoExiste)
+                {
+                    writer.WriteLine("Pontuacao,Esquivas,Ataques,DanoRecebido,Nome,Idade,Diversao,Dificuldade,Objetivos,Visual,Jogabilidade,Bugs,Indicacao");
+                }
+
+                writer.WriteLine($"{dadosJogador},{string.Join(",", respostas)}");
             }
 
-            writer.WriteLine($"{dadosJogador},{string.Join(",", respostas)}");
+            Debug.Log("Dados salvos com sucesso em: " + caminho);
         }
+        catch (Exception e)
+        {
+            Debug.LogError("Erro ao salvar dados: " + e.Message);
+        }
+    }
+
+    // Metodo para buscar automaticamente as referencias dos componentes
+    private void BuscarReferenciasAutomaticamente()
+    {
+        // Busca o canvas dentro do objeto atual
+        if (canvasQuestionario == null)
+            canvasQuestionario = GetComponent<Canvas>();
+
+        // Busca o componente Text com o nome especifico
+        if (textoamostra == null)
+            textoamostra = GameObject.Find("textoamostra")?.GetComponent<Text>();
+
+        // Busca o InputField com o nome especifico
+        if (txtInsert == null)
+            txtInsert = GameObject.Find("txtInsert")?.GetComponent<InputField>();
+
+        // Busca e armazena todos os botoes com os nomes B_1 a B_5
+        if (botoesResposta == null || botoesResposta.Length == 0)
+        {
+            botoesResposta = new Button[5];
+            for (int i = 0; i < 5; i++)
+            {
+                GameObject botaoObj = GameObject.Find($"B_{i + 1}");
+                if (botaoObj != null)
+                {
+                    botoesResposta[i] = botaoObj.GetComponent<Button>();
+                }
+            }
+        }
+
+        // Log de verificacao para debug
+        Debug.Log("Referencias buscadas automaticamente: " +
+                  (canvasQuestionario != null) + " " +
+                  (textoamostra != null) + " " +
+                  (txtInsert != null) + " " +
+                  (botoesResposta != null && botoesResposta.Length == 5));
     }
 }

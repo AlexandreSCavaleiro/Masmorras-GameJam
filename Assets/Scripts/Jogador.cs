@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
+using UnityEngine.InputSystem.HID;
 
 // Controla movimento, animacoes, esquiva, ataque e sistema de vida
 public class Jogador : MonoBehaviour
@@ -8,6 +9,8 @@ public class Jogador : MonoBehaviour
     private Rigidbody2D corpo; // Referencia para o componente Rigidbody2D do jogador
     private Animator animador; // Referencia para o componente Animator do jogador
     private GameObject areaDeAtaque; // Referencia para area de ataque (objeto filho)
+    private GameObject HUD; // Referencia para o HUD (objeto pai)
+
     private BoxCollider2D areaDeAtaqueCollider; // Referencia para o BoxCollider2D da area de ataque (objeto filho)
     private int direcao = 1; // Variavel para armazenar a direcao atual do jogador (0: cima, 1: baixo, 2: esquerda, 3: direita)
     private int ultimaDirecao = -1;
@@ -20,7 +23,7 @@ public class Jogador : MonoBehaviour
     private float ultimaMagnitudeVelocidade = 0f;
     private float horizontal; // Variavel para armazenar input horizontal
     private float vertical; // Variavel para armazenar input vertical
-    private float cooldownAtaque = 1.5f; // Variavel para controlar o cooldown entre ataques
+    private float cooldownAtaque = 0.5f; // Variavel para controlar o cooldown entre ataques
     private float tempoEsquiva = 0f; // Variavel para controlar o tempo de esquiva
     private float duracaoEsquiva = 0.3f; // Tempo de duracao da esquiva em segundos
     private float duracaoAtaque = 0.5f; // Tempo de duracao do ataque em segundos
@@ -47,6 +50,9 @@ public class Jogador : MonoBehaviour
 
         areaDeAtaqueCollider = transform.Find("AreaDeAtaque").GetComponent<BoxCollider2D>(); // Encontra o objeto filho chamado "AreaDeAtaque" e obtem seu BoxCollider2D
         areaDeAtaque = GameObject.Find("AreaDeAtaque");
+
+        HUD = GameObject.Find("Canvas");
+
         //areaDeAtaqueCollider.enabled = false; // Desativa a colisao da area de ataque no inicio
         areaDeAtaqueCollider.enabled = true;
         direcao = 1;
@@ -58,20 +64,31 @@ public class Jogador : MonoBehaviour
     // Metodo chamado a cada frame
     void Update()
     {
+        int vidaanterior = vidaAtual;
+
         // Garante que a vida nao fique negativa
         if (vidaAtual < 0)
         {
             vidaAtual = 0;
         }
 
+        if (vidaAtual == 0)
+        {
+            vivo = false;
+            transform.GetComponent<BoxCollider2D>().enabled = false; // Desativa colisao
+        }
+
+        if (vidaanterior != vidaAtual)
+        {
+            // Atualiza a barra de vida no HUD
+            HUD.GetComponent<barraDeVida>().setMax(vidaMaxima);
+            GameObject.Find("Vida").GetComponent<barraDeVida>().setAtual(vidaAtual);
+        }
+
+        vidaanterior = vidaAtual;
+
         // Verifica constantemente se o jogo terminou
         VerificarFimDeJogo();
-
-        if (!vivo)
-        {
-            Destroy(transform.gameObject);
-            return;
-        }
 
         // Se o jogador pode se mover, processa as entradas
         if (podeMover)
@@ -79,15 +96,8 @@ public class Jogador : MonoBehaviour
             ProcessarEntradas();
         }
 
-        if (vidaAtual == 0)
-        {
-
-            vivo = false;
-        }
-
+        
         VerificarMudancasEstado(); // Verifica mudancas de estado para atualizar animacoes
-
-
     }
 
     // Metodo chamado em intervalos fixos de tempo para fisica
@@ -257,13 +267,13 @@ public class Jogador : MonoBehaviour
             if (vertical > 0)
             {
                 direcao = 0;
-                areaDeAtaque.transform.position = new Vector2(transform.position.x, transform.position.y + 0.7f);
+                areaDeAtaque.transform.position = new Vector2(transform.position.x, transform.position.y + 0.8f);
             }
             // Para baixo
             else
             {
                 direcao = 1;
-                areaDeAtaque.transform.position = new Vector2(transform.position.x, transform.position.y - 0.7f);
+                areaDeAtaque.transform.position = new Vector2(transform.position.x, transform.position.y - 0.8f);
             }
         }
         else if (horizontal != 0)
@@ -272,13 +282,13 @@ public class Jogador : MonoBehaviour
             if (horizontal < 0)
             {
                 direcao = 2;
-                areaDeAtaque.transform.position = new Vector2(transform.position.x - 0.6f, transform.position.y);
+                areaDeAtaque.transform.position = new Vector2(transform.position.x - 0.65f, transform.position.y);
             }
             // Para direita
             else
             {
                 direcao = 3;
-                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0.6f, transform.position.y);
+                areaDeAtaque.transform.position = new Vector2(transform.position.x + 0.65f, transform.position.y);
             }
         }
     }
@@ -465,7 +475,7 @@ public class Jogador : MonoBehaviour
         podeMover = false; // Impede movimento durante o ataque
         corpo.linearVelocity = Vector2.zero; // Para o movimento do jogador
 
-        Invoke("AtivarAreaDeAtaque", 0.25f); // Aguarda um tempo antes de ativar a area de ataque
+        Invoke("AtivarAreaDeAtaque", 0.3f); // Aguarda um tempo antes de ativar a area de ataque
     }
 
     // Corrotina para ativar a area de ataque temporariamente

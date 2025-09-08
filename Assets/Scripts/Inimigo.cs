@@ -70,7 +70,7 @@ public class Inimigo : MonoBehaviour
         }
         
         // Atualiza animacoes baseadas no nivel inicial
-        AtualizarAnimacoesPorNivel();
+        //AtualizarAnimacoesPorNivel();
     }
 
     // Metodo chamado a cada frame
@@ -412,7 +412,7 @@ public class Inimigo : MonoBehaviour
         StartCoroutine(AtivarAreaDeAtaque());
 		
 		// Invoca o resfriamento entre ataques
-		int intervaloAtaque = 10 / nivel;
+		int intervaloAtaque = 20 / nivel;
 		
 		if (intervaloAtaque < 1)
 		{
@@ -424,7 +424,7 @@ public class Inimigo : MonoBehaviour
     
 	void ResfriamentoAtaque()
 	{
-		podeAtacar = true;
+        FinalizarAtaque();
 	}
 		
 	
@@ -461,6 +461,7 @@ public class Inimigo : MonoBehaviour
             rbProjetil.AddForce(direcaoProjetil * 10f, ForceMode2D.Impulse);
         }
 
+        Movimentar();
         Invoke("FinalizarAtaque", 2);
     }
 
@@ -468,19 +469,20 @@ public class Inimigo : MonoBehaviour
     {
         // Finaliza o ataque
         estaAtacando = false;
+        podeAtacar = true;
     }
 
     // Corrotina para ativar a area de ataque temporariamente
     IEnumerator AtivarAreaDeAtaque()
     {
         // Aguarda um quarto de segundo antes de ativar a area de ataque
-        yield return new WaitForSeconds(0.25f);
+        yield return new WaitForSeconds(0.45f);
         
         // Ativa o collider da area de ataque
         areaDeAtaqueCollider.enabled = true;
         
         // Aguarda um quarto de segundo com a area ativa
-        yield return new WaitForSeconds(0.25f);
+        yield return new WaitForSeconds(0.45f);
         
         // Desativa o collider da area de ataque
         areaDeAtaqueCollider.enabled = false;
@@ -504,7 +506,7 @@ public class Inimigo : MonoBehaviour
                 // Se o objeto tem o script Jogador, causa dano
                 if (scriptJogador != null)
                 {
-                    scriptJogador.DanoAoJogador(1);
+                    scriptJogador.vidaAtual --;
                 }
             }
         }
