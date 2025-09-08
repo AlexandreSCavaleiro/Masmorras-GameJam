@@ -27,7 +27,7 @@ public class Moeda : MonoBehaviour
         }
         if (!MoedaOriginal)
         {
-            Destroy(transform.gameObject, 0.2f);
+            Destroy(transform.gameObject, 3f);
         }
 
         // Tenta obter o script Jogador do objeto colidido

@@ -570,8 +570,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4687bea859412634385062b8fa8a1270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vidaAtual: 5
-  vidaMaxima: 5
+  vidaAtual: 1
+  vidaMaxima: 1
   nivel: 1
   quantidadeEsquivas: 0
   quantidadeAtaques: 0
@@ -727,7 +727,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 100
   m_Sprite: {fileID: -3074489128429790846, guid: 726ae8864e8b05144a4d5ab0b0789398, type: 3}
-  m_Color: {r: 0.764151, g: 0.38628134, b: 0.24150053, a: 1}
+  m_Color: {r: 0.032440357, g: 0.2523689, b: 0.764151, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1531,17 +1531,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4687bea859412634385062b8fa8a1270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vidaAtual: 5
-  vidaMaxima: 5
+  vidaAtual: 1
+  vidaMaxima: 1
   nivel: 1
   quantidadeEsquivas: 0
   quantidadeAtaques: 0
   quantidadeDanoRecebido: 0
   velocidadeMaxima: 2
-  forcaEsquiva: 4
+  forcaEsquiva: 3
   distanciaManter: 1
   distanciaAtaque: 1
-  frequenciaEsquiva: 9
+  frequenciaEsquiva: 5
   vivo: 1
   ataqueCriaProjetil: 0
   deveFlanquear: 0
@@ -1665,8 +1665,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 100
-  m_Sprite: {fileID: -3074489128429790846, guid: 726ae8864e8b05144a4d5ab0b0789398, type: 3}
-  m_Color: {r: 0.764151, g: 0.38628134, b: 0.24150053, a: 1}
+  m_Sprite: {fileID: -5154492, guid: 7053fe16dbafe0c498e7c9002af16748, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1685,7 +1685,7 @@ Transform:
   m_GameObject: {fileID: 801385045}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.55, y: 4.18, z: 0}
+  m_LocalPosition: {x: 6.25, y: -0.6, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3496,8 +3496,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4687bea859412634385062b8fa8a1270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vidaAtual: 5
-  vidaMaxima: 5
+  vidaAtual: 1
+  vidaMaxima: 1
   nivel: 4
   quantidadeEsquivas: 0
   quantidadeAtaques: 0
@@ -3653,7 +3653,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 100
   m_Sprite: {fileID: -3074489128429790846, guid: 726ae8864e8b05144a4d5ab0b0789398, type: 3}
-  m_Color: {r: 0.764151, g: 0.38628134, b: 0.24150053, a: 1}
+  m_Color: {r: 0.6698113, g: 0.0031594948, b: 0.46430194, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
