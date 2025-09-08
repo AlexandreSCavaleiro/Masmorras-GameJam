@@ -87,7 +87,7 @@ public class Character : MonoBehaviour
         if (collision == null) return;
         if (collision.gameObject.name.Contains("Sala"))
         {
-            GameObject.FindWithTag("MainCamera").gameObject.GetComponent
+            //GameObject.FindWithTag("MainCamera").gameObject.GetComponent
         } 
     }
 
