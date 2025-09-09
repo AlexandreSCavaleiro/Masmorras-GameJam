@@ -28,6 +28,7 @@ public class Jogador : MonoBehaviour
     private float duracaoEsquiva = 0.3f; // Tempo de duracao da esquiva em segundos
     private float duracaoAtaque = 0.5f; // Tempo de duracao do ataque em segundos
 
+    [Header("Configurações do char")]
     public Transform projetil; // Objeto projetil
     public float velocidadeMovimento = 5f; // Velocidade maxima de movimentacao do jogador
     public float forcaEsquiva = 10f; // Forca do impulso durante a esquiva
@@ -40,6 +41,11 @@ public class Jogador : MonoBehaviour
     public int quantidadeEsquivas = 0; // Contador de vezes que o jogador esquivou
     public int quantidadeAtaques = 0; // Contador de vezes que o jogador atacou
     public int quantidadeDanoRecebido = 0; // Contador de vezes que o jogador foi atingido
+
+    [Header("Configurações busca de inimigo")]
+    public float intervaloVerificacao = 2f; // Intervalo entre verificações
+    public string tagInimigo = "Inimigo"; // Tag para identificar inimigos
+    public string nomeContem = "Inimigo"; // Texto que deve conter no nome
 
 
     // Metodo chamado quando o script e inicializado
@@ -59,6 +65,9 @@ public class Jogador : MonoBehaviour
         vidaAtual = vidaMaxima; // Inicializa a vida atual com o valor maximo
         vivo = true; // inicia o personagem vivo
         focaAtaque = 1; // Foca de ataque inicial
+
+        // Inicia a verificação periódica
+        StartCoroutine(VerificarInimigosPeriodicamente());
     }
 
     // Metodo chamado a cada frame
@@ -76,13 +85,6 @@ public class Jogador : MonoBehaviour
         {
             vivo = false;
             transform.GetComponent<BoxCollider2D>().enabled = false; // Desativa colisao
-        }
-
-        if (vidaanterior != vidaAtual)
-        {
-            // Atualiza a barra de vida no HUD
-            HUD.GetComponent<barraDeVida>().setMax(vidaMaxima);
-            GameObject.Find("Vida").GetComponent<barraDeVida>().setAtual(vidaAtual);
         }
 
         vidaanterior = vidaAtual;
@@ -494,6 +496,64 @@ public class Jogador : MonoBehaviour
         podeMover = true; // Permite movimento novamente
     }
 
+
+    // Corrotina para verificar inimigos periodicamente
+    private IEnumerator VerificarInimigosPeriodicamente()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(intervaloVerificacao);
+            VerificarSeNaoHaInimigos();
+        }
+    }
+    // Método para verificar se não há mais inimigos
+    public void VerificarSeNaoHaInimigos()
+    {
+        if (!HaInimigosNaCena())
+        {
+            // Busca o canvas FimDeJogo que e filho do GameObject Jogador
+            Transform canvasFimDeJogo = transform.Find("FimDeJogo");
+
+            if (canvasFimDeJogo != null)
+            {
+                // Obtem o componente FimDeJogo do canvas
+                FimDeJogo scriptFimDeJogo = canvasFimDeJogo.GetComponent<FimDeJogo>();
+
+                if (scriptFimDeJogo != null)
+                {
+                    // Chama o metodo para iniciar o questionario
+                    scriptFimDeJogo.IniciarQuestionario();
+                }
+                else
+                {
+                    Debug.LogError("Script FimDeJogo nao encontrado no canvas filho");
+                }
+            }
+            else
+            {
+                Debug.LogError("Canvas FimDeJogo nao encontrado como filho do Jogador");
+            }
+
+            // Para a verificação periódica
+            StopAllCoroutines();
+        }
+    }
+
+    // Método que verifica se ainda existem inimigos na cena
+    public bool HaInimigosNaCena()
+    {
+        // Opção 2: Buscar por nome contendo "Inimigo" (caso não use tags)
+        GameObject[] todosObjetos = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+        foreach (GameObject obj in todosObjetos)
+        {
+            if (obj.activeInHierarchy && obj.name.Contains(nomeContem))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     // Metodo chamado quando a area de ataque colide com outro objeto
     void OnTriggerStay2D(Collider2D outro)

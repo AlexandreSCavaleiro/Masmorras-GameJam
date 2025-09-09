@@ -1,8 +1,9 @@
-using UnityEngine;
-using UnityEngine.UI;
-using System.IO;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class FimDeJogo : MonoBehaviour
 {
@@ -149,6 +150,8 @@ public class FimDeJogo : MonoBehaviour
         {
             SalvarDados();
             canvasQuestionario.gameObject.SetActive(false);
+
+            SceneManager.LoadScene("Menu");
             return;
         }
 

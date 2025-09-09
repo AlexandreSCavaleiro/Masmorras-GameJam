@@ -83,6 +83,11 @@ public class Inimigo : MonoBehaviour
             vidaAtual = 0;
         }
 
+        if (vidaAtual > vidaMaxima)
+        {
+            vidaAtual = vidaMaxima;
+        }
+
         if (vidaAtual == 0)
         {
 
@@ -91,7 +96,7 @@ public class Inimigo : MonoBehaviour
 
         if (!vivo)
         {
-            //alvoJogador.transform.;
+            alvoJogador.GetComponent<Jogador>().vidaAtual ++;
             Destroy(transform.gameObject);
             return;
         }
@@ -508,7 +513,7 @@ public class Inimigo : MonoBehaviour
                 // Se o objeto tem o script Jogador, causa dano
                 if (scriptJogador != null)
                 {
-                    scriptJogador.DanoAoJogador(danoAplicavel);
+                    scriptJogador.DanoAoJogador(1);
                 }
             }
         }

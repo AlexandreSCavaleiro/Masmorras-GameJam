@@ -4,20 +4,28 @@ using UnityEngine.UI;
 public class barraDeVida : MonoBehaviour
 {
     public Slider slider;
-    
-    public void TakeDamage(float damage)
+    private Transform alvoJogador; // Referencia para o transform do jogador
+
+    void Start()
     {
-        slider.value -= damage;
-        slider.value = Mathf.Min(slider.value, 0, slider.value);
+        alvoJogador = GameObject.FindGameObjectWithTag("Player").transform; // Encontra o jogador pela tag
+        setMax();
+        setAtual();
     }
 
-    public void setMax(float max)
+    public void Update()
     {
-        slider.maxValue = max;
+        setMax();
+        setAtual();
     }
 
-    public void setAtual(float vida)
+    public void setMax()
     {
-        slider.value = vida;
+        slider.maxValue = alvoJogador.GetComponent<Jogador>().vidaMaxima;
+    }
+
+    public void setAtual()
+    {
+        slider.value = alvoJogador.GetComponent<Jogador>().vidaAtual;
     }
 }
