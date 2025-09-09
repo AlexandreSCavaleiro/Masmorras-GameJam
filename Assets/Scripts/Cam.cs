@@ -8,10 +8,16 @@ public class Cam : MonoBehaviour
 
     void Start()
     {
-        if (target == null)
+        
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.F))
         {
-            target = GameObject.FindWithTag("Player").transform;
+            transform.position = GameObject.Find("Sala2/CamPos").transform.position;
         }
+
     }
 
     void LateUpdate()

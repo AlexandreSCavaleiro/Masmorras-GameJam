@@ -560,6 +560,15 @@ public class Jogador : MonoBehaviour
         return false;
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.name.Contains("Sala"))
+        {
+            Camera.main.transform.GetComponent<Cam>().target = collision.transform.Find("CamPos").transform;
+        }
+    }
+
+
     // Metodo chamado quando a area de ataque colide com outro objeto
     void OnTriggerStay2D(Collider2D outro)
     {
