@@ -91,6 +91,7 @@ public class Inimigo : MonoBehaviour
 
         if (!vivo)
         {
+            //alvoJogador.transform.;
             Destroy(transform.gameObject);
             return;
         }
@@ -507,7 +508,7 @@ public class Inimigo : MonoBehaviour
                 // Se o objeto tem o script Jogador, causa dano
                 if (scriptJogador != null)
                 {
-                    scriptJogador.vidaAtual--;
+                    scriptJogador.DanoAoJogador(danoAplicavel);
                 }
             }
         }

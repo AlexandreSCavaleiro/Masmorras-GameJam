@@ -14,6 +14,8 @@ public class FimDeJogo : MonoBehaviour
     public InputField txtInsert;
     // Array para armazenar os botoes de resposta numerica (1 a 5)
     public Button[] botoesResposta;
+    // Referencia para o botao de prosseguir
+    public Button botaoProsseguir;
 
     GameObject jogadorObj;
 
@@ -46,6 +48,7 @@ public class FimDeJogo : MonoBehaviour
         canvasQuestionario.gameObject.SetActive(false);
         textoamostra.gameObject.SetActive(false);
         txtInsert.gameObject.SetActive(false);
+        botaoProsseguir.gameObject.SetActive(false);
 
         // Busca o objeto do jogador e coleta seus dados
         jogadorObj = GameObject.Find("Jogador");
@@ -60,8 +63,9 @@ public class FimDeJogo : MonoBehaviour
         {
             btn.gameObject.SetActive(false);
         }
-        // Configura o campo de texto para capturar a tecla Enter
-        txtInsert.onEndEdit.AddListener(HandleTextInput);
+
+        // Configura o listener para o botao de prosseguir
+        botaoProsseguir.onClick.AddListener(ProsseguirPergunta);
     }
 
     // Metodo publico para ser chamado por outro script quando o jogo termina
@@ -73,6 +77,7 @@ public class FimDeJogo : MonoBehaviour
         canvasQuestionario.gameObject.SetActive(true);
         textoamostra.gameObject.SetActive(true);
         txtInsert.gameObject.SetActive(true);
+        botaoProsseguir.gameObject.SetActive(true);
 
         if (jogadorObj != null)
         {
@@ -92,22 +97,46 @@ public class FimDeJogo : MonoBehaviour
         // Mostra a primeira pergunta
         textoamostra.text += "\n\n" + perguntas[perguntaAtual];
 
-        // Ativa apenas o campo de texto para a primeira pergunta
+        // Ativa apenas o campo de texto e botao de prosseguir para as primeiras perguntas
         txtInsert.gameObject.SetActive(true);
+        botaoProsseguir.gameObject.SetActive(true);
         foreach (Button btn in botoesResposta)
         {
             btn.gameObject.SetActive(false);
         }
     }
 
-    // Manipula a entrada de texto do usuario
-    private void HandleTextInput(string input)
+    // Metodo chamado quando o botao de prosseguir e pressionado
+    private void ProsseguirPergunta()
     {
-        if (!string.IsNullOrEmpty(input) && (Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter)))
+        // Para as duas primeiras perguntas (nome e idade), usa o texto do InputField
+        if (perguntaAtual < 2)
         {
-            respostas.Add(input);
-            txtInsert.text = "";
-            AvancarPergunta();
+            if (!string.IsNullOrEmpty(txtInsert.text))
+            {
+                respostas.Add(txtInsert.text);
+                txtInsert.text = "";
+                AvancarPergunta();
+            }
+        }
+        // Para as perguntas de multipla escolha, verifica se uma resposta foi selecionada
+        else
+        {
+            // Verifica se alguma resposta foi selecionada (esta logica pode ser ajustada conforme necessidade)
+            bool respostaSelecionada = false;
+            foreach (string resposta in respostas)
+            {
+                if (resposta != null && resposta.Length > 0)
+                {
+                    respostaSelecionada = true;
+                    break;
+                }
+            }
+
+            if (respostaSelecionada)
+            {
+                AvancarPergunta();
+            }
         }
     }
 
@@ -129,6 +158,7 @@ public class FimDeJogo : MonoBehaviour
         if (perguntaAtual >= 2)
         {
             txtInsert.gameObject.SetActive(false);
+            botaoProsseguir.gameObject.SetActive(true);
             foreach (Button btn in botoesResposta)
             {
                 btn.gameObject.SetActive(true);
@@ -138,6 +168,7 @@ public class FimDeJogo : MonoBehaviour
         {
             // Para a segunda pergunta (idade), mantem o campo de texto
             txtInsert.gameObject.SetActive(true);
+            botaoProsseguir.gameObject.SetActive(true);
             foreach (Button btn in botoesResposta)
             {
                 btn.gameObject.SetActive(false);
@@ -149,7 +180,7 @@ public class FimDeJogo : MonoBehaviour
     public void RespostaBotao(int numeroBotao)
     {
         respostas.Add(numeroBotao.ToString());
-        AvancarPergunta();
+        // Nao avanca automaticamente, aguarda o botao de prosseguir
     }
 
     // Salva os dados no arquivo CSV
@@ -207,11 +238,22 @@ public class FimDeJogo : MonoBehaviour
             }
         }
 
+        // Busca o botao de prosseguir
+        if (botaoProsseguir == null)
+        {
+            GameObject prosseguirObj = GameObject.Find("B_Prosseguir");
+            if (prosseguirObj != null)
+            {
+                botaoProsseguir = prosseguirObj.GetComponent<Button>();
+            }
+        }
+
         // Log de verificacao para debug
         Debug.Log("Referencias buscadas automaticamente: " +
                   (canvasQuestionario != null) + " " +
                   (textoamostra != null) + " " +
                   (txtInsert != null) + " " +
-                  (botoesResposta != null && botoesResposta.Length == 5));
+                  (botoesResposta != null && botoesResposta.Length == 5) + " " +
+                  (botaoProsseguir != null));
     }
 }
