@@ -225,6 +225,11 @@ public class Jogador : MonoBehaviour
         {
             IniciarAtaque();
         }
+
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 
     // Move o jogador baseado nos inputs

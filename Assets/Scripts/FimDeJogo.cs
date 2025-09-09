@@ -41,6 +41,13 @@ public class FimDeJogo : MonoBehaviour
         "Voce indicaria para um amigo? (Marque de 1 a 5, sendo 1 igual a 'nunca', 3 igual 'as vezes' e 5 igual a 'sempre')"
     };
 
+
+    public int Pontuacao;
+    public int quantidadeEsquivas; // Contador de vezes que o jogador esquivou
+    public int quantidadeAtaques; // Contador de vezes que o jogador atacou
+    public int quantidadeDanoRecebido; // Contador de vezes que o jogador foi atingido
+
+
     void Start()
     {
         // Busca automaticamente as referencias dos componentes
@@ -75,6 +82,11 @@ public class FimDeJogo : MonoBehaviour
         perguntaAtual = 0;
         respostas.Clear();
 
+        Pontuacao = jogadorObj.GetComponent<Jogador>().Pontuacao;
+        quantidadeEsquivas = jogadorObj.GetComponent<Jogador>().quantidadeEsquivas;
+        quantidadeAtaques = jogadorObj.GetComponent<Jogador>().quantidadeAtaques;
+        quantidadeDanoRecebido = jogadorObj.GetComponent<Jogador>().quantidadeDanoRecebido;
+
         canvasQuestionario.gameObject.SetActive(true);
         textoamostra.gameObject.SetActive(true);
         txtInsert.gameObject.SetActive(true);
@@ -101,6 +113,7 @@ public class FimDeJogo : MonoBehaviour
         // Ativa apenas o campo de texto e botao de prosseguir para as primeiras perguntas
         txtInsert.gameObject.SetActive(true);
         botaoProsseguir.gameObject.SetActive(true);
+
         foreach (Button btn in botoesResposta)
         {
             btn.gameObject.SetActive(false);
@@ -157,7 +170,7 @@ public class FimDeJogo : MonoBehaviour
 
         textoamostra.text = perguntas[perguntaAtual];
 
-        // Ativa botoes para perguntas de multipla escolha (pergunta 2 em diante)
+        // Ativa botoes para perguntas de multipla escolha (pergunta 3 em diante)
         if (perguntaAtual >= 2)
         {
             txtInsert.gameObject.SetActive(false);
@@ -183,7 +196,6 @@ public class FimDeJogo : MonoBehaviour
     public void RespostaBotao(int numeroBotao)
     {
         respostas.Add(numeroBotao.ToString());
-        // Nao avanca automaticamente, aguarda o botao de prosseguir
     }
 
     // Salva os dados no arquivo CSV
@@ -200,7 +212,6 @@ public class FimDeJogo : MonoBehaviour
                 {
                     writer.WriteLine("Pontuacao,Esquivas,Ataques,DanoRecebido,Nome,Idade,Diversao,Dificuldade,Objetivos,Visual,Jogabilidade,Bugs,Indicacao");
                 }
-
                 writer.WriteLine($"{dadosJogador},{string.Join(",", respostas)}");
             }
 
